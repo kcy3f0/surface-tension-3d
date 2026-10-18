@@ -1,0 +1,90 @@
+# MTL Material Library for Surface Tension Experiment Apparatus
+newmtl BaseMetalBlue
+Kd 0.15 0.35 0.70
+Ks 0.5 0.5 0.6
+Ns 40.0
+d 1.0
+
+newmtl ChromeMetal
+Kd 0.85 0.88 0.90
+Ks 0.95 0.95 0.95
+Ns 90.0
+d 1.0
+
+newmtl ClampMetal
+Kd 0.55 0.58 0.60
+Ks 0.7 0.7 0.7
+Ns 50.0
+d 1.0
+
+newmtl WoodLever
+Kd 0.86 0.72 0.52
+Ks 0.1 0.1 0.1
+Ns 10.0
+d 1.0
+
+newmtl WhiteString
+Kd 0.95 0.95 0.92
+Ks 0.1 0.1 0.1
+Ns 5.0
+d 1.0
+
+newmtl GlassBeaker
+Kd 0.85 0.92 0.95
+Ks 0.9 0.95 0.98
+Ns 120.0
+d 0.35
+
+newmtl SaltWater
+Kd 0.25 0.65 0.85
+Ks 0.8 0.9 0.95
+Ns 100.0
+d 0.55
+
+newmtl ClearPlasticCup
+Kd 0.90 0.95 0.98
+Ks 0.7 0.8 0.85
+Ns 80.0
+d 0.40
+
+newmtl BeadRed
+Kd 0.90 0.20 0.25
+Ks 0.8 0.6 0.6
+Ns 60.0
+d 1.0
+
+newmtl BeadGold
+Kd 0.95 0.78 0.20
+Ks 0.9 0.85 0.5
+Ns 70.0
+d 1.0
+
+newmtl BeadCyan
+Kd 0.15 0.80 0.85
+Ks 0.8 0.9 0.9
+Ns 60.0
+d 1.0
+
+newmtl BeadPurple
+Kd 0.70 0.25 0.85
+Ks 0.8 0.6 0.85
+Ns 60.0
+d 1.0
+
+newmtl ScaleBase
+Kd 0.20 0.22 0.25
+Ks 0.4 0.4 0.4
+Ns 30.0
+d 1.0
+
+newmtl ScalePlatter
+Kd 0.25 0.55 0.85
+Ks 0.8 0.8 0.9
+Ns 70.0
+d 1.0
+
+newmtl RedTray
+Kd 0.85 0.20 0.15
+Ks 0.4 0.3 0.3
+Ns 40.0
+d 1.0

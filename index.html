@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>食鹽水濃度與表面張力實驗裝置 - 3D 互動模型與探究分析系統</title>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-panel: rgba(30, 41, 59, 0.88);
+      --bg-panel-hover: rgba(51, 65, 85, 0.95);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --accent-green: #34d399;
+      --accent-amber: #fbbf24;
+      --accent-rose: #f43f5e;
+      --border: rgba(148, 163, 184, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      display: block;
+    }
+
+    /* Header Bar */
+    header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.4) 80%, transparent 100%);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .header-title {
+      pointer-events: auto;
+    }
+
+    .header-title h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #ffffff;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-weight: 500;
+    }
+
+    .header-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    /* Floating Panels */
+    .glass-panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+      color: var(--text-main);
+      pointer-events: auto;
+      transition: all 0.2s ease;
+    }
+
+    /* Left Sidebar: Controls & Modes */
+    #control-panel {
+      position: absolute;
+      top: 80px;
+      left: 20px;
+      width: 320px;
+      z-index: 10;
+      padding: 18px;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+
+    /* Right Sidebar: Experiment Data & Physics */
+    #data-panel {
+      position: absolute;
+      top: 80px;
+      right: 20px;
+      width: 340px;
+      z-index: 10;
+      padding: 18px;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
+    }
+
+    /* Bottom Toolbar */
+    #bottom-bar {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .control-group {
+      margin-bottom: 18px;
+    }
+
+    .control-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .control-label span.value-highlight {
+      color: var(--accent);
+      font-weight: 600;
+      font-family: "SF Mono", Consolas, monospace;
+    }
+
+    /* Buttons & Inputs */
+    button {
+      cursor: pointer;
+      font-family: inherit;
+      border: 1px solid var(--border);
+      background: rgba(51, 65, 85, 0.7);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    button:hover {
+      background: var(--bg-panel-hover);
+      border-color: rgba(148, 163, 184, 0.4);
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button.btn-primary {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      border-color: #38bdf8;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+    }
+
+    button.btn-primary:hover {
+      background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+      box-shadow: 0 6px 16px rgba(2, 132, 199, 0.5);
+    }
+
+    button.btn-active {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .btn-group-row {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .btn-group-row button {
+      flex: 1;
+      padding: 6px 4px;
+      font-size: 0.8rem;
+    }
+
+    /* Range slider */
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #334155;
+      outline: none;
+      margin: 8px 0;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+      border: 2px solid #ffffff;
+    }
+
+    /* Switch toggle */
+    .switch-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .switch-title {
+      font-size: 0.84rem;
+      color: var(--text-main);
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155;
+      transition: .2s;
+      border-radius: 22px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .2s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(18px);
+    }
+
+    /* Table */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .data-table th, .data-table td {
+      padding: 6px 4px;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    .data-table th {
+      background: rgba(51, 65, 85, 0.5);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .data-table tr.active-row {
+      background: rgba(56, 189, 248, 0.2);
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    /* Physics Formula Card */
+    .formula-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-top: 10px;
+      font-size: 0.82rem;
+    }
+
+    .formula-math {
+      font-family: "SF Pro Text", -apple-system, "Cambria Math", "Times New Roman", serif;
+      font-size: 0.95rem;
+      color: var(--accent-amber);
+      text-align: center;
+      margin: 4px 0;
+      letter-spacing: 0.5px;
+    }
+
+    /* Status Banner */
+    #status-toast {
+      position: absolute;
+      top: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 15;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid var(--accent);
+      color: #ffffff;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    #status-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(10px);
+    }
+
+    /* 3D Label Hotspots */
+    .hotspot-label {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--accent);
+      color: #f8fafc;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      pointer-events: none;
+      transform: translate(-50%, -100%);
+      white-space: nowrap;
+      transition: opacity 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    .hotspot-label::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 4px solid var(--accent);
+    }
+
+    /* Mini Trend Chart */
+    .chart-container {
+      width: 100%;
+      height: 120px;
+      margin-top: 12px;
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      padding: 8px;
+      position: relative;
+    }
+
+    svg.trend-chart {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.3);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.5);
+    }
+  </style>
+
+  <!-- Load Local Three.js and dependencies (with automatic CDN fallback) -->
+  <script src="libs/three.min.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
+  <script src="libs/OrbitControls.js"></script>
+  <script>
+    if (typeof THREE.OrbitControls === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"><\/script>');
+    }
+  </script>
+  <script src="libs/GLTFExporter.js"></script>
+  <script>
+    if (typeof THREE.GLTFExporter === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/GLTFExporter.js"><\/script>');
+    }
+  </script>
+  <script src="libs/OBJExporter.js"></script>
+  <script>
+    if (typeof THREE.OBJExporter === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/exporters/OBJExporter.js"><\/script>');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header>
+    <div class="header-title">
+      <h1>
+        🧪 食鹽水表面張力測定裝置 3D 模型
+        <span class="badge">探究與實作專題</span>
+      </h1>
+      <p class="header-subtitle">基於拉脫法（Detachment Method）等臂天平測量系統之高精度 3D 數位孿生模型</p>
+    </div>
+
+    <div class="header-actions">
+      <button id="btn-export-glb" class="btn-primary" title="導出 GLB 檔案，可直接拖入 PPT 做 3D 簡報！">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        導出 3D 模型 (.GLB)
+      </button>
+      <button id="btn-export-png-white" title="儲存白底無背景干擾的高畫質圖，適合直接貼入 Word 報告">
+        📸 儲存報告用截圖 (白底)
+      </button>
+      <button id="btn-export-png-trans" title="儲存透明背景 PNG，適合簡報去背排版">
+        ✨ 儲存透明截圖 (PNG)
+      </button>
+    </div>
+  </header>
+
+  <!-- 3D Canvas -->
+  <canvas id="webgl-canvas"></canvas>
+
+  <!-- Left Sidebar: Controls & Modes -->
+  <div id="control-panel" class="glass-panel">
+    <div class="section-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      實驗模擬控制
+    </div>
+
+    <!-- Salt Concentration Select -->
+    <div class="control-group">
+      <div class="control-label">
+        <span>食鹽水重量百分濃度 (wt%)</span>
+        <span class="value-highlight" id="lbl-conc">0% (純水)</span>
+      </div>
+      <div class="btn-group-row">
+        <button class="btn-active" onclick="setConcentration(0)">0%</button>
+        <button onclick="setConcentration(5)">5%</button>
+        <button onclick="setConcentration(10)">10%</button>
+        <button onclick="setConcentration(15)">15%</button>
+        <button onclick="setConcentration(20)">20%</button>
+      </div>
+    </div>
+
+    <!-- Bead Load Slider -->
+    <div class="control-group">
+      <div class="control-label">
+        <span>右側配重（珠子重量）</span>
+        <span class="value-highlight" id="lbl-weight">0.00 g</span>
+      </div>
+      <input type="range" id="weight-slider" min="0" max="4.5" step="0.02" value="0">
+      <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted);">
+        <span>0.0 g (初始)</span>
+        <span id="lbl-critical-tip" style="color:var(--accent-amber);">臨界拉脫: 2.98 g</span>
+        <span>4.5 g</span>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="control-group btn-grid">
+      <button id="btn-add-bead" onclick="stepAddBead()">
+        ➕ 投入單顆珠子
+      </button>
+      <button id="btn-auto-simulate" class="btn-primary" onclick="toggleAutoSimulate()">
+        ▶️ 自動緩慢加珠
+      </button>
+      <button onclick="resetSimulation()" style="grid-column: span 2;">
+        🔄 重置實驗平衡狀態
+      </button>
+    </div>
+
+    <div class="section-title" style="margin-top: 16px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      視角與可視化圖層
+    </div>
+
+    <!-- Switch toggles -->
+    <label class="switch-row">
+      <span class="switch-title">物理受力分析向量 (力箭頭)</span>
+      <div class="toggle-switch">
+        <input type="checkbox" id="toggle-vectors" checked onchange="toggleForceVectors(this.checked)">
+        <span class="slider"></span>
+      </div>
+    </label>
+
+    <label class="switch-row">
+      <span class="switch-title">元件構造標籤 (3D 標籤)</span>
+      <div class="toggle-switch">
+        <input type="checkbox" id="toggle-labels" checked onchange="toggleLabels(this.checked)">
+        <span class="slider"></span>
+      </div>
+    </label>
+
+    <label class="switch-row">
+      <span class="switch-title">尺寸標記線 (等臂長度/杯緣)</span>
+      <div class="toggle-switch">
+        <input type="checkbox" id="toggle-dimensions" checked onchange="toggleDimensions(this.checked)">
+        <span class="slider"></span>
+      </div>
+    </label>
+
+    <label class="switch-row">
+      <span class="switch-title">自動鏡頭慢速旋轉</span>
+      <div class="toggle-switch">
+        <input type="checkbox" id="toggle-autorotate" onchange="toggleAutoRotate(this.checked)">
+        <span class="slider"></span>
+      </div>
+    </label>
+  </div>
+
+  <!-- Right Sidebar: Experiment Data & Physics -->
+  <div id="data-panel" class="glass-panel">
+    <div class="section-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      實驗數據記錄處理
+    </div>
+
+    <!-- Handwritten Sheet Actual Data Table -->
+    <table class="data-table" id="exp-table">
+      <thead>
+        <tr>
+          <th>濃度</th>
+          <th>平均承重(g)</th>
+          <th>表面張力(N/m)</th>
+          <th>標準差</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="row-0" class="active-row">
+          <td>0%</td>
+          <td>2.978</td>
+          <td>0.0684</td>
+          <td>0.159</td>
+        </tr>
+        <tr id="row-5">
+          <td>5%</td>
+          <td>3.248</td>
+          <td>0.0746</td>
+          <td>0.214</td>
+        </tr>
+        <tr id="row-10">
+          <td>10%</td>
+          <td>3.132</td>
+          <td>0.0720</td>
+          <td>0.164</td>
+        </tr>
+        <tr id="row-15">
+          <td>15%</td>
+          <td>3.258</td>
+          <td>0.0748</td>
+          <td>0.097</td>
+        </tr>
+        <tr id="row-20">
+          <td>20%</td>
+          <td>3.650</td>
+          <td>0.0838</td>
+          <td>0.223</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Formula & Principle -->
+    <div class="formula-card">
+      <div style="font-weight:600; color:var(--text-main); margin-bottom:4px;">📐 表面張力計算公式</div>
+      <div class="formula-math">γ = F / L = (m × g) / L</div>
+      <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.4;">
+        • <strong>杯緣接觸周長 L</strong>：21.33 cm = 0.2133 m<br>
+        • <strong>拉脫極限承重 m</strong>：<span id="lbl-math-m">2.978</span> g<br>
+        • <strong>重力加速度 g</strong>：9.80 m/s²<br>
+        • <strong>計算表面張力 γ</strong>：<span id="lbl-math-gamma" style="color:var(--accent); font-weight:700;">0.0684</span> N/m
+      </div>
+    </div>
+
+    <!-- Trend Chart -->
+    <div class="control-label" style="margin-top:14px; margin-bottom:2px;">
+      <span>濃度 vs 表面張力 趨勢圖</span>
+      <span style="font-size:0.75rem; color:var(--accent-green);">正相關上升</span>
+    </div>
+    <div class="chart-container">
+      <svg class="trend-chart" viewBox="0 0 280 100">
+        <!-- Axes -->
+        <line x1="30" y1="85" x2="270" y2="85" stroke="#475569" stroke-width="1.5" />
+        <line x1="30" y1="10" x2="30" y2="85" stroke="#475569" stroke-width="1.5" />
+        
+        <!-- Y Gridlines -->
+        <line x1="30" y1="20" x2="270" y2="20" stroke="#334155" stroke-dasharray="3,3" />
+        <text x="24" y="23" fill="#64748b" font-size="8" text-anchor="end">0.09</text>
+        <line x1="30" y1="52" x2="270" y2="52" stroke="#334155" stroke-dasharray="3,3" />
+        <text x="24" y="55" fill="#64748b" font-size="8" text-anchor="end">0.07</text>
+
+        <!-- Data Trend Polyline: x coords: 45, 95, 145, 195, 245 -->
+        <!-- y values: 0.0684 -> y=54, 0.0746 -> y=45, 0.0720 -> y=49, 0.0748 -> y=44, 0.0838 -> y=30 -->
+        <polyline points="45,54 95,45 145,49 195,44 245,30" fill="none" stroke="#38bdf8" stroke-width="2.5" />
+        
+        <!-- Points -->
+        <circle id="dot-0" cx="45" cy="54" r="4.5" fill="#38bdf8" stroke="#ffffff" stroke-width="1.5" />
+        <circle id="dot-5" cx="95" cy="45" r="3" fill="#38bdf8" />
+        <circle id="dot-10" cx="145" cy="49" r="3" fill="#38bdf8" />
+        <circle id="dot-15" cx="195" cy="44" r="3" fill="#38bdf8" />
+        <circle id="dot-20" cx="245" cy="30" r="3" fill="#38bdf8" />
+
+        <!-- X Labels -->
+        <text x="45" y="96" fill="#94a3b8" font-size="8" text-anchor="middle">0%</text>
+        <text x="95" y="96" fill="#94a3b8" font-size="8" text-anchor="middle">5%</text>
+        <text x="145" y="96" fill="#94a3b8" font-size="8" text-anchor="middle">10%</text>
+        <text x="195" y="96" fill="#94a3b8" font-size="8" text-anchor="middle">15%</text>
+        <text x="245" y="96" fill="#94a3b8" font-size="8" text-anchor="middle">20%</text>
+      </svg>
+    </div>
+
+    <!-- Inquiry Conclusion -->
+    <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted); background:rgba(30,41,59,0.5); padding:8px; border-radius:6px; border-left: 3px solid var(--accent-green);">
+      <strong>探究結論驗證：</strong><br>
+      隨食鹽濃度增加，溶液表面張力由 <strong>0.0684 N/m</strong> 顯著上升至 <strong>0.0838 N/m</strong>，符合「當食鹽濃度上升，表面張力大小上升」之實驗假設。
+    </div>
+  </div>
+
+  <!-- Bottom Toolbar: Camera Presets -->
+  <div id="bottom-bar" class="glass-panel">
+    <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600; margin-right:4px;">視角導航:</span>
+    <button onclick="setCameraView('iso')" class="btn-active" id="cam-iso">🌐 全景等角</button>
+    <button onclick="setCameraView('front')" id="cam-front">📐 正面平視 (報告示意圖)</button>
+    <button onclick="setCameraView('beaker')" id="cam-beaker">🧪 燒杯拉脫特寫</button>
+    <button onclick="setCameraView('weights')" id="cam-weights">⚖️ 砝碼杯特寫</button>
+    <button onclick="setCameraView('top')" id="cam-top">🔝 俯視圖</button>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="status-toast">💥 達到最大拉脫力！杯緣已瞬間脫離水面！</div>
+
+  <!-- 3D Hotspot Label Overlays (Positioned dynamically in render loop) -->
+  <div id="hotspot-labels-container">
+    <div class="hotspot-label" id="lbl-3d-stand">鐵架台 (底座與立柱)</div>
+    <div class="hotspot-label" id="lbl-3d-beam">木製等臂槓桿 (L₁ = L₂)</div>
+    <div class="hotspot-label" id="lbl-3d-cup">倒扣塑膠杯 (杯緣長度 21.33cm)</div>
+    <div class="hotspot-label" id="lbl-3d-beaker">1000mL 玻璃刻度燒杯</div>
+    <div class="hotspot-label" id="lbl-3d-weightcup">微調配重塑膠杯 (彩色珠子)</div>
+    <div class="hotspot-label" id="lbl-3d-scale">精密電子秤</div>
+  </div>
+
+  <script>
+    /* =========================================================
+       1. DATA & CONSTANTS
+       ========================================================= */
+    const EXP_DATA = {
+      0:  { weight: 2.978, gamma: 0.0684, std: 0.159, color: '#38bdf8' },
+      5:  { weight: 3.248, gamma: 0.0746, std: 0.214, color: '#34d399' },
+      10: { weight: 3.132, gamma: 0.0720, std: 0.164, color: '#a78bfa' },
+      15: { weight: 3.258, gamma: 0.0748, std: 0.097, color: '#f472b6' },
+      20: { weight: 3.650, gamma: 0.0838, std: 0.223, color: '#fb923c' },
+    };
+
+    let currentConc = 0;
+    let currentBeadWeight = 0.0;
+    let isAutoSimulating = false;
+    let autoSimInterval = null;
+    let isDetached = false;
+
+    /* =========================================================
+       2. THREE.JS SCENE SETUP
+       ========================================================= */
+    const canvas = document.getElementById('webgl-canvas');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0c1222);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(28, 42, 62);
+
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.target.set(0, 22, 0);
+    controls.maxPolarAngle = Math.PI / 2 + 0.08; // Don't go completely below ground
+    controls.minDistance = 15;
+    controls.maxDistance = 150;
+
+    /* Lighting */
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
+    scene.add(ambientLight);
+
+    const mainLight = new THREE.DirectionalLight(0xfff5ea, 1.2);
+    mainLight.position.set(35, 75, 45);
+    mainLight.castShadow = true;
+    mainLight.shadow.mapSize.width = 2048;
+    mainLight.shadow.mapSize.height = 2048;
+    mainLight.shadow.camera.near = 10;
+    mainLight.shadow.camera.far = 160;
+    mainLight.shadow.camera.left = -40;
+    mainLight.shadow.camera.right = 40;
+    mainLight.shadow.camera.top = 40;
+    mainLight.shadow.camera.bottom = -40;
+    scene.add(mainLight);
+
+    const fillLight = new THREE.DirectionalLight(0x93c5fd, 0.6);
+    fillLight.position.set(-40, 40, -30);
+    scene.add(fillLight);
+
+    const rimLight = new THREE.PointLight(0x38bdf8, 0.8, 80);
+    rimLight.position.set(0, 30, -25);
+    scene.add(rimLight);
+
+    /* Laboratory Bench Floor */
+    const floorGeo = new THREE.PlaneGeometry(160, 160);
+    const floorMat = new THREE.MeshStandardMaterial({
+      color: 0x111827,
+      roughness: 0.35,
+      metalness: 0.1
+    });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -0.05;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    /* Grid overlay on floor */
+    const grid = new THREE.GridHelper(160, 40, 0x334155, 0x1e293b);
+    grid.position.y = 0.01;
+    scene.add(grid);
+
+    /* =========================================================
+       3. APPARATUS 3D MODEL HIERARCHY
+       ========================================================= */
+    const apparatusRoot = new THREE.Group();
+    scene.add(apparatusRoot);
+
+    // Common Materials
+    const bluePaintMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.4, metalness: 0.4 });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.15, metalness: 0.9 });
+    const darkMetalMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5, metalness: 0.7 });
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0xdfb489, roughness: 0.65, metalness: 0.05 });
+    const stringMat = new THREE.MeshBasicMaterial({ color: 0xf1f5f9 });
+    const glassMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      transmission: 0.9,
+      opacity: 1,
+      transparent: true,
+      roughness: 0.08,
+      ior: 1.5,
+      reflectivity: 0.9,
+      clearcoat: 1.0
+    });
+    const plasticMat = new THREE.MeshPhysicalMaterial({
+      color: 0xf8fafc,
+      transmission: 0.75,
+      opacity: 0.6,
+      transparent: true,
+      roughness: 0.2,
+      ior: 1.45,
+      side: THREE.DoubleSide
+    });
+    const waterMat = new THREE.MeshPhysicalMaterial({
+      color: 0x38bdf8,
+      transmission: 0.85,
+      opacity: 0.8,
+      transparent: true,
+      roughness: 0.05,
+      ior: 1.33
+    });
+
+    /* --- Retort Stand --- */
+    const standBaseGeo = new THREE.BoxGeometry(22, 2.2, 14);
+    const standBase = new THREE.Mesh(standBaseGeo, bluePaintMat);
+    standBase.position.set(0, 1.1, -14);
+    standBase.castShadow = true;
+    standBase.receiveShadow = true;
+    apparatusRoot.add(standBase);
+
+    // Stand bevel edge
+    const standBevelGeo = new THREE.BoxGeometry(20.5, 0.3, 12.5);
+    const standBevel = new THREE.Mesh(standBevelGeo, bluePaintMat);
+    standBevel.position.set(0, 2.3, -14);
+    apparatusRoot.add(standBevel);
+
+    // Vertical Steel Pole
+    const poleGeo = new THREE.CylinderGeometry(0.65, 0.65, 54, 24);
+    const pole = new THREE.Mesh(poleGeo, chromeMat);
+    pole.position.set(0, 28, -14);
+    pole.castShadow = true;
+    apparatusRoot.add(pole);
+
+    // Cross Clamp
+    const clampY = 49;
+    const clampGeo = new THREE.BoxGeometry(3.2, 3.2, 3.2);
+    const clamp = new THREE.Mesh(clampGeo, darkMetalMat);
+    clamp.position.set(0, clampY, -14);
+    clamp.castShadow = true;
+    apparatusRoot.add(clamp);
+
+    // Clamp Screws
+    const screwGeo = new THREE.CylinderGeometry(0.35, 0.35, 2.8, 12);
+    const screw1 = new THREE.Mesh(screwGeo, chromeMat);
+    screw1.rotation.z = Math.PI / 2;
+    screw1.position.set(-2.2, clampY, -14);
+    apparatusRoot.add(screw1);
+
+    // Horizontal Extension Rod
+    const horizArmGeo = new THREE.CylinderGeometry(0.55, 0.55, 17, 24);
+    const horizArm = new THREE.Mesh(horizArmGeo, chromeMat);
+    horizArm.rotation.x = Math.PI / 2;
+    horizArm.position.set(0, clampY, -5.5);
+    horizArm.castShadow = true;
+    apparatusRoot.add(horizArm);
+
+    /* --- Center Pivot & Suspension System --- */
+    // Suspension string hanging from horizontal rod (0, 49, 0) to pivot (0, 36, 0)
+    const pivotStringGeo = new THREE.CylinderGeometry(0.06, 0.06, 13, 8);
+    const pivotString = new THREE.Mesh(pivotStringGeo, stringMat);
+    pivotString.position.set(0, 42.5, 0);
+    apparatusRoot.add(pivotString);
+
+    // Lever Pivot Group (Rotates around Z-axis at (0, 36, 0))
+    const pivotGroup = new THREE.Group();
+    pivotGroup.position.set(0, 36, 0);
+    apparatusRoot.add(pivotGroup);
+
+    // Wooden Lever Beam: length 30cm (-15 to +15), height 0.7cm, width 1.8cm
+    const leverGeo = new THREE.BoxGeometry(30, 0.7, 1.8);
+    const leverBeam = new THREE.Mesh(leverGeo, woodMat);
+    leverBeam.castShadow = true;
+    pivotGroup.add(leverBeam);
+
+    // Center Tie Collar
+    const centerTieGeo = new THREE.BoxGeometry(0.5, 0.9, 2.0);
+    const centerTie = new THREE.Mesh(centerTieGeo, stringMat);
+    pivotGroup.add(centerTie);
+
+    /* --- Left Hanging Apparatus (Inverted Cup) --- */
+    const LEFT_ARM_X = -13.5;
+    const leftHangerGroup = new THREE.Group();
+    leftHangerGroup.position.set(LEFT_ARM_X, 0, 0);
+    pivotGroup.add(leftHangerGroup);
+
+    // Left String (length ~ 13.5cm)
+    const leftStringGeo = new THREE.CylinderGeometry(0.05, 0.05, 13.5, 8);
+    const leftString = new THREE.Mesh(leftStringGeo, stringMat);
+    leftString.position.set(0, -6.75, 0);
+    leftHangerGroup.add(leftString);
+
+    // Left Inverted Cup Group
+    const invertedCupGroup = new THREE.Group();
+    invertedCupGroup.position.set(0, -13.5, 0);
+    leftHangerGroup.add(invertedCupGroup);
+
+    // Inverted Cup Mesh: Cup top (at bottom of group) radius 2.4, Rim (at y = -9) radius 3.4
+    // Circumference = 2 * pi * 3.4 = 21.36 cm (matches student sheet 21.33 cm!)
+    const cupHeight = 9.0;
+    const cupGeo = new THREE.CylinderGeometry(2.4, 3.4, cupHeight, 36, 1, true);
+    const invertedCup = new THREE.Mesh(cupGeo, plasticMat);
+    invertedCup.position.set(0, -cupHeight / 2, 0);
+    invertedCup.castShadow = true;
+    invertedCupGroup.add(invertedCup);
+
+    // Cup bottom cap (top when inverted)
+    const cupTopCapGeo = new THREE.CircleGeometry(2.4, 36);
+    const cupTopCap = new THREE.Mesh(cupTopCapGeo, plasticMat);
+    cupTopCap.rotation.x = -Math.PI / 2;
+    invertedCupGroup.add(cupTopCap);
+
+    // Cup rim lip
+    const cupLipGeo = new THREE.TorusGeometry(3.42, 0.12, 12, 36);
+    const cupLip = new THREE.Mesh(cupLipGeo, plasticMat);
+    cupLip.rotation.x = Math.PI / 2;
+    cupLip.position.set(0, -cupHeight, 0);
+    invertedCupGroup.add(cupLip);
+
+    // String tie knot at top of cup
+    const tieKnotGeo = new THREE.SphereGeometry(0.3, 12, 12);
+    const tieKnot = new THREE.Mesh(tieKnotGeo, stringMat);
+    invertedCupGroup.add(tieKnot);
+
+    /* --- Left Stationary 1000mL Glass Beaker & Salt Water --- */
+    const beakerX = LEFT_ARM_X;
+    const beakerY = 0;
+    const beakerZ = 0;
+    const beakerGroup = new THREE.Group();
+    beakerGroup.position.set(beakerX, beakerY, beakerZ);
+    apparatusRoot.add(beakerGroup);
+
+    // 1000mL Beaker Outer Cylinder: height 15cm, radius 5.4cm
+    const beakerHeight = 15.0;
+    const beakerRadius = 5.4;
+    const beakerWallGeo = new THREE.CylinderGeometry(beakerRadius, beakerRadius, beakerHeight, 48, 1, true);
+    const beakerWall = new THREE.Mesh(beakerWallGeo, glassMat);
+    beakerWall.position.set(0, beakerHeight / 2, 0);
+    beakerWall.castShadow = true;
+    beakerGroup.add(beakerWall);
+
+    // Beaker Bottom
+    const beakerBottomGeo = new THREE.CylinderGeometry(beakerRadius, beakerRadius, 0.4, 48);
+    const beakerBottom = new THREE.Mesh(beakerBottomGeo, glassMat);
+    beakerBottom.position.set(0, 0.2, 0);
+    beakerGroup.add(beakerBottom);
+
+    // Beaker Pouring Spout Lip
+    const beakerRimGeo = new THREE.TorusGeometry(beakerRadius, 0.18, 16, 48);
+    const beakerRim = new THREE.Mesh(beakerRimGeo, glassMat);
+    beakerRim.rotation.x = Math.PI / 2;
+    beakerRim.position.set(0, beakerHeight, 0);
+    beakerGroup.add(beakerRim);
+
+    // Beaker Volume Graduation Scale Rings (200, 400, 600, 800, 1000 mL)
+    const scaleLineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 });
+    for (let ml = 200; ml <= 1000; ml += 200) {
+      const lineY = (ml / 1000) * 12.0 + 1.2;
+      const gradGeo = new THREE.TorusGeometry(beakerRadius + 0.02, 0.05, 8, 32, Math.PI / 3);
+      const gradLine = new THREE.Mesh(gradGeo, scaleLineMat);
+      gradLine.rotation.x = Math.PI / 2;
+      gradLine.rotation.z = Math.PI * 0.8;
+      gradLine.position.set(0, lineY, 0);
+      beakerGroup.add(gradLine);
+    }
+
+    // Salt Water Liquid: surface height touches cup rim at rest (y = 13.5cm)
+    const liquidHeight = 13.5;
+    const waterGeo = new THREE.CylinderGeometry(beakerRadius - 0.15, beakerRadius - 0.15, liquidHeight, 48);
+    const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+    waterMesh.position.set(0, liquidHeight / 2 + 0.2, 0);
+    beakerGroup.add(waterMesh);
+
+    // Liquid Meniscus Necking Ring (Simulates surface tension adhesion pulling water up)
+    const meniscusGeo = new THREE.CylinderGeometry(3.38, 3.42, 0.8, 36, 1, true);
+    const meniscusMat = new THREE.MeshPhysicalMaterial({
+      color: 0x7dd3fc,
+      transmission: 0.8,
+      transparent: true,
+      roughness: 0.1,
+      side: THREE.DoubleSide
+    });
+    const meniscusMesh = new THREE.Mesh(meniscusGeo, meniscusMat);
+    meniscusMesh.position.set(0, 13.5, 0);
+    beakerGroup.add(meniscusMesh);
+
+    /* --- Right Hanging Apparatus (Upright Cup + Colored Beads) --- */
+    const RIGHT_ARM_X = 13.5;
+    const rightHangerGroup = new THREE.Group();
+    rightHangerGroup.position.set(RIGHT_ARM_X, 0, 0);
+    pivotGroup.add(rightHangerGroup);
+
+    // Right V-shape Strings
+    const rightString1Geo = new THREE.CylinderGeometry(0.05, 0.05, 17, 8);
+    const rightString1 = new THREE.Mesh(rightString1Geo, stringMat);
+    rightString1.position.set(0, -8.5, -1.5);
+    rightString1.rotation.x = -0.15;
+    rightHangerGroup.add(rightString1);
+
+    const rightString2 = new THREE.Mesh(rightString1Geo, stringMat);
+    rightString2.position.set(0, -8.5, 1.5);
+    rightString2.rotation.x = 0.15;
+    rightHangerGroup.add(rightString2);
+
+    // Right Upright Plastic Cup (Rim at y = -17, Bottom at y = -26)
+    const weightCupGroup = new THREE.Group();
+    weightCupGroup.position.set(0, -17, 0);
+    rightHangerGroup.add(weightCupGroup);
+
+    const weightCupGeo = new THREE.CylinderGeometry(3.4, 2.4, cupHeight, 36, 1, true);
+    const weightCup = new THREE.Mesh(weightCupGeo, plasticMat);
+    weightCup.position.set(0, -cupHeight / 2, 0);
+    weightCup.castShadow = true;
+    weightCupGroup.add(weightCup);
+
+    // Weight Cup bottom
+    const weightCupBottomGeo = new THREE.CircleGeometry(2.4, 36);
+    const weightCupBottom = new THREE.Mesh(weightCupBottomGeo, plasticMat);
+    weightCupBottom.rotation.x = Math.PI / 2;
+    weightCupBottom.position.set(0, -cupHeight, 0);
+    weightCupGroup.add(weightCupBottom);
+
+    // Weight Cup rim lip
+    const weightCupLip = new THREE.Mesh(cupLipGeo, plasticMat);
+    weightCupLip.rotation.x = Math.PI / 2;
+    weightCupLip.position.set(0, 0, 0);
+    weightCupGroup.add(weightCupLip);
+
+    // Colored Beads inside the Right Cup
+    const beadsGroup = new THREE.Group();
+    beadsGroup.position.set(0, -cupHeight + 0.35, 0);
+    weightCupGroup.add(beadsGroup);
+
+    const beadMaterials = [
+      new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.3, metalness: 0.3 }), // Red
+      new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.25, metalness: 0.5 }), // Gold
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.3 }), // Cyan
+      new THREE.MeshStandardMaterial({ color: 0xa855f7, roughness: 0.3, metalness: 0.3 }), // Purple
+      new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.2 }), // Pearl white
+    ];
+
+    const beadMeshes = [];
+    const MAX_BEADS = 50;
+    for (let b = 0; b < MAX_BEADS; b++) {
+      const radius = 0.28;
+      const beadGeo = new THREE.SphereGeometry(radius, 12, 12);
+      const beadMat = beadMaterials[b % beadMaterials.length];
+      const beadMesh = new THREE.Mesh(beadGeo, beadMat);
+      
+      const angle = (b * 137.5 * Math.PI) / 180;
+      const r = Math.sqrt(b / MAX_BEADS) * 1.8;
+      const bx = Math.cos(angle) * r;
+      const bz = Math.sin(angle) * r;
+      const by = Math.floor(b / 14) * 0.45;
+      
+      beadMesh.position.set(bx, by, bz);
+      beadMesh.castShadow = true;
+      beadMesh.visible = false; // controlled by weight
+      beadsGroup.add(beadMesh);
+      beadMeshes.push(beadMesh);
+    }
+
+    /* --- Laboratory Accessories: Digital Scale & Red Tray --- */
+    // Digital Scale directly under the right cup
+    const scaleGroup = new THREE.Group();
+    scaleGroup.position.set(RIGHT_ARM_X, 0, 0);
+    apparatusRoot.add(scaleGroup);
+
+    const scaleBaseGeo = new THREE.BoxGeometry(11, 1.6, 11);
+    const scaleBase = new THREE.Mesh(scaleBaseGeo, new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5 }));
+    scaleBase.position.set(0, 0.8, 0);
+    scaleBase.castShadow = true;
+    scaleGroup.add(scaleBase);
+
+    // Blue weighing plate
+    const scalePlateGeo = new THREE.BoxGeometry(9, 0.3, 9);
+    const scalePlate = new THREE.Mesh(scalePlateGeo, new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 }));
+    scalePlate.position.set(0, 1.7, 0);
+    scaleGroup.add(scalePlate);
+
+    // Scale LCD Screen
+    const lcdGeo = new THREE.BoxGeometry(4.5, 0.1, 1.6);
+    const lcdScreen = new THREE.Mesh(lcdGeo, new THREE.MeshBasicMaterial({ color: 0x0ea5e9 }));
+    lcdScreen.position.set(0, 1.65, 3.8);
+    scaleGroup.add(lcdScreen);
+
+    // Red water drip tray on the left
+    const redTrayGeo = new THREE.BoxGeometry(14, 1.5, 18);
+    const redTrayMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4 });
+    const redTray = new THREE.Mesh(redTrayGeo, redTrayMat);
+    redTray.position.set(-23, 0.75, 4);
+    redTray.castShadow = true;
+    apparatusRoot.add(redTray);
+
+    /* =========================================================
+       4. PHYSICS FORCE VECTORS & DIMENSION OVERLAYS
+       ========================================================= */
+    const vectorsGroup = new THREE.Group();
+    apparatusRoot.add(vectorsGroup);
+
+    function createArrow(dir, origin, length, color, headLength = 1.6, headWidth = 0.9) {
+      const arrow = new THREE.ArrowHelper(dir.clone().normalize(), origin, length, color, headLength, headWidth);
+      arrow.line.material.linewidth = 3;
+      return arrow;
+    }
+
+    // Downward Red Vector at left cup rim: Surface Tension F_gamma
+    const arrowSurfaceTension = createArrow(
+      new THREE.Vector3(0, -1, 0),
+      new THREE.Vector3(LEFT_ARM_X, 13.5, 0),
+      5.5,
+      0xf43f5e
+    );
+    vectorsGroup.add(arrowSurfaceTension);
+
+    // Downward Green Vector at right weight cup: Gravity W = mg
+    const arrowGravity = createArrow(
+      new THREE.Vector3(0, -1, 0),
+      new THREE.Vector3(RIGHT_ARM_X, 8.0, 0),
+      5.5,
+      0x34d399
+    );
+    vectorsGroup.add(arrowGravity);
+
+    // Upward Blue Vector at center pivot: Support Reaction N
+    const arrowPivot = createArrow(
+      new THREE.Vector3(0, 1, 0),
+      new THREE.Vector3(0, 36.5, 0),
+      6.0,
+      0x38bdf8
+    );
+    vectorsGroup.add(arrowPivot);
+
+    // Dimensions Group
+    const dimensionsGroup = new THREE.Group();
+    apparatusRoot.add(dimensionsGroup);
+
+    // Dimension line L1 (left lever arm: 13.5cm)
+    const dimLineMat = new THREE.LineDashedMaterial({ color: 0xfbbf24, dashSize: 0.5, gapSize: 0.3 });
+    const dimL1Geo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 38.5, 0),
+      new THREE.Vector3(LEFT_ARM_X, 38.5, 0)
+    ]);
+    const dimL1 = new THREE.Line(dimL1Geo, dimLineMat);
+    dimL1.computeLineDistances();
+    dimensionsGroup.add(dimL1);
+
+    // Dimension line L2 (right lever arm: 13.5cm)
+    const dimL2Geo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 38.5, 0),
+      new THREE.Vector3(RIGHT_ARM_X, 38.5, 0)
+    ]);
+    const dimL2 = new THREE.Line(dimL2Geo, dimLineMat);
+    dimL2.computeLineDistances();
+    dimensionsGroup.add(dimL2);
+
+    /* =========================================================
+       5. SIMULATION & INTERACTION LOGIC
+       ========================================================= */
+    const weightSlider = document.getElementById('weight-slider');
+    const lblWeight = document.getElementById('lbl-weight');
+    const lblConc = document.getElementById('lbl-conc');
+    const lblCriticalTip = document.getElementById('lbl-critical-tip');
+    const lblMathM = document.getElementById('lbl-math-m');
+    const lblMathGamma = document.getElementById('lbl-math-gamma');
+    const statusToast = document.getElementById('status-toast');
+
+    function setConcentration(conc) {
+      currentConc = conc;
+      const data = EXP_DATA[conc];
+      
+      // Update UI labels
+      lblConc.textContent = `${conc}% ${conc === 0 ? '(純水)' : '食鹽水'}`;
+      lblCriticalTip.textContent = `臨界拉脫: ${data.weight.toFixed(2)} g`;
+      lblMathM.textContent = data.weight.toFixed(3);
+      lblMathGamma.textContent = data.gamma.toFixed(4);
+
+      // Update button styles
+      document.querySelectorAll('.btn-group-row button').forEach((btn, idx) => {
+        const concValues = [0, 5, 10, 15, 20];
+        if (concValues[idx] === conc) {
+          btn.className = 'btn-active';
+        } else {
+          btn.className = '';
+        }
+      });
+
+      // Update table active row
+      document.querySelectorAll('.data-table tbody tr').forEach(row => {
+        row.className = '';
+      });
+      const activeRow = document.getElementById(`row-${conc}`);
+      if (activeRow) activeRow.className = 'active-row';
+
+      // Update trend chart dots
+      [0, 5, 10, 15, 20].forEach(c => {
+        const dot = document.getElementById(`dot-${c}`);
+        if (dot) {
+          dot.setAttribute('r', c === conc ? '5.5' : '3');
+          dot.setAttribute('fill', c === conc ? '#38bdf8' : '#64748b');
+          dot.setAttribute('stroke', c === conc ? '#ffffff' : 'none');
+          dot.setAttribute('stroke-width', c === conc ? '2' : '0');
+        }
+      });
+
+      // Update liquid color subtly
+      const tintFactor = conc / 20;
+      waterMat.color.setRGB(0.22 - tintFactor * 0.05, 0.74 - tintFactor * 0.08, 0.95);
+
+      updateApparatusState();
+    }
+
+    function updateApparatusState() {
+      const criticalWeight = EXP_DATA[currentConc].weight;
+      lblWeight.textContent = `${currentBeadWeight.toFixed(2)} g`;
+      weightSlider.value = currentBeadWeight;
+
+      // Update visible bead count (max 50 beads proportional to weight)
+      const visibleCount = Math.min(MAX_BEADS, Math.round((currentBeadWeight / 4.0) * MAX_BEADS));
+      for (let i = 0; i < MAX_BEADS; i++) {
+        beadMeshes[i].visible = i < visibleCount;
+      }
+
+      // Check detachment state
+      if (currentBeadWeight >= criticalWeight) {
+        if (!isDetached) {
+          isDetached = true;
+          triggerDetachmentAlert();
+        }
+        // Cup is detached from water
+        const excess = currentBeadWeight - criticalWeight;
+        const tiltAngle = Math.min(0.25, 0.08 + excess * 0.12); // Right side tilts down
+        pivotGroup.rotation.z = -tiltAngle; // tilt beam
+        
+        // Hide/collapse meniscus necking
+        meniscusMesh.visible = false;
+        
+        // Scale gravity arrow proportionally
+        arrowGravity.scale.set(1, 1 + currentBeadWeight * 0.4, 1);
+        arrowSurfaceTension.visible = false; // No surface tension acting once pulled off!
+      } else {
+        isDetached = false;
+        hideDetachmentAlert();
+
+        // Beam stays almost level, slightly tensed
+        const tensionRatio = currentBeadWeight / criticalWeight;
+        pivotGroup.rotation.z = -tensionRatio * 0.02; // very slight pre-tilt
+
+        // Meniscus stretches upward as cup edge is pulled up
+        meniscusMesh.visible = true;
+        const stretchHeight = 0.8 + tensionRatio * 1.4;
+        meniscusMesh.scale.set(1 - tensionRatio * 0.1, stretchHeight, 1 - tensionRatio * 0.1);
+        meniscusMesh.position.y = 13.5 + stretchHeight * 0.3;
+
+        // Force arrows visible
+        arrowSurfaceTension.visible = true;
+        arrowSurfaceTension.scale.set(1, 1 + tensionRatio * 0.6, 1);
+        arrowGravity.scale.set(1, 1 + tensionRatio * 0.6, 1);
+      }
+    }
+
+    weightSlider.addEventListener('input', (e) => {
+      currentBeadWeight = parseFloat(e.target.value);
+      updateApparatusState();
+    });
+
+    function stepAddBead() {
+      currentBeadWeight = Math.min(4.5, currentBeadWeight + 0.15);
+      updateApparatusState();
+    }
+
+    function toggleAutoSimulate() {
+      const btn = document.getElementById('btn-auto-simulate');
+      if (isAutoSimulating) {
+        clearInterval(autoSimInterval);
+        isAutoSimulating = false;
+        btn.textContent = '▶️ 自動緩慢加珠';
+        btn.className = 'btn-primary';
+      } else {
+        isAutoSimulating = true;
+        btn.textContent = '⏸️ 暫停模擬';
+        btn.className = 'btn-active';
+        autoSimInterval = setInterval(() => {
+          if (currentBeadWeight < 4.2) {
+            currentBeadWeight += 0.04;
+            updateApparatusState();
+          } else {
+            toggleAutoSimulate();
+          }
+        }, 80);
+      }
+    }
+
+    function resetSimulation() {
+      if (isAutoSimulating) toggleAutoSimulate();
+      currentBeadWeight = 0.0;
+      updateApparatusState();
+    }
+
+    function triggerDetachmentAlert() {
+      statusToast.textContent = `💥 達最大拉脫力 (${EXP_DATA[currentConc].weight.toFixed(2)}g)！杯緣已瞬間脫離水面！`;
+      statusToast.classList.add('show');
+    }
+
+    function hideDetachmentAlert() {
+      statusToast.classList.remove('show');
+    }
+
+    /* =========================================================
+       6. TOGGLE CONTROLS & CAMERA PRESETS
+       ========================================================= */
+    function toggleForceVectors(show) {
+      vectorsGroup.visible = show;
+    }
+
+    function toggleDimensions(show) {
+      dimensionsGroup.visible = show;
+    }
+
+    function toggleAutoRotate(enabled) {
+      controls.autoRotate = enabled;
+      controls.autoRotateSpeed = 1.5;
+    }
+
+    let labelsVisible = true;
+    function toggleLabels(show) {
+      labelsVisible = show;
+      document.getElementById('hotspot-labels-container').style.display = show ? 'block' : 'none';
+    }
+
+    function setCameraView(preset) {
+      // Highlight button
+      document.querySelectorAll('#bottom-bar button').forEach(b => b.className = '');
+      const btn = document.getElementById(`cam-${preset}`);
+      if (btn) btn.className = 'btn-active';
+
+      if (preset === 'iso') {
+        animateCamera(new THREE.Vector3(28, 42, 62), new THREE.Vector3(0, 22, 0));
+      } else if (preset === 'front') {
+        animateCamera(new THREE.Vector3(0, 24, 75), new THREE.Vector3(0, 24, 0));
+      } else if (preset === 'beaker') {
+        animateCamera(new THREE.Vector3(LEFT_ARM_X + 6, 20, 24), new THREE.Vector3(LEFT_ARM_X, 15, 0));
+      } else if (preset === 'weights') {
+        animateCamera(new THREE.Vector3(RIGHT_ARM_X - 6, 16, 24), new THREE.Vector3(RIGHT_ARM_X, 10, 0));
+      } else if (preset === 'top') {
+        animateCamera(new THREE.Vector3(0, 85, 5), new THREE.Vector3(0, 20, 0));
+      }
+    }
+
+    function animateCamera(targetPos, targetLookAt) {
+      const startPos = camera.position.clone();
+      const startLook = controls.target.clone();
+      let progress = 0;
+
+      function step() {
+        progress += 0.04;
+        if (progress <= 1) {
+          camera.position.lerpVectors(startPos, targetPos, easeInOutCubic(progress));
+          controls.target.lerpVectors(startLook, targetLookAt, easeInOutCubic(progress));
+          controls.update();
+          requestAnimationFrame(step);
+        } else {
+          camera.position.copy(targetPos);
+          controls.target.copy(targetLookAt);
+          controls.update();
+        }
+      }
+      step();
+    }
+
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    /* =========================================================
+       7. 3D HOTSPOT LABELS TRACKING
+       ========================================================= */
+    const hotspots = [
+      { id: 'lbl-3d-stand', pos: new THREE.Vector3(0, 52, -14) },
+      { id: 'lbl-3d-beam', pos: new THREE.Vector3(0, 37.5, 0) },
+      { id: 'lbl-3d-cup', pos: new THREE.Vector3(LEFT_ARM_X, 23.5, 0) },
+      { id: 'lbl-3d-beaker', pos: new THREE.Vector3(LEFT_ARM_X - 5.5, 12, 0) },
+      { id: 'lbl-3d-weightcup', pos: new THREE.Vector3(RIGHT_ARM_X + 4.5, 12, 0) },
+      { id: 'lbl-3d-scale', pos: new THREE.Vector3(RIGHT_ARM_X, 2.5, 6) }
+    ];
+
+    function updateHotspotPositions() {
+      if (!labelsVisible) return;
+      const widthHalf = window.innerWidth / 2;
+      const heightHalf = window.innerHeight / 2;
+
+      hotspots.forEach(hs => {
+        const el = document.getElementById(hs.id);
+        if (!el) return;
+
+        const tempVec = hs.pos.clone();
+        tempVec.project(camera);
+
+        if (tempVec.z > 1) {
+          el.style.opacity = '0';
+          return;
+        }
+
+        const screenX = (tempVec.x * widthHalf) + widthHalf;
+        const screenY = -(tempVec.y * heightHalf) + heightHalf;
+
+        el.style.left = `${screenX}px`;
+        el.style.top = `${screenY}px`;
+        el.style.opacity = '1';
+      });
+    }
+
+    /* =========================================================
+       8. EXPORT SUITE (GLB / PNG)
+       ========================================================= */
+    // Export GLB file
+    document.getElementById('btn-export-glb').addEventListener('click', () => {
+      if (typeof THREE.GLTFExporter === 'undefined') {
+        alert('GLTFExporter 正在載入，請稍候重試！');
+        return;
+      }
+      const exporter = new THREE.GLTFExporter();
+      exporter.parse(
+        apparatusRoot,
+        function (gltf) {
+          const blob = new Blob([gltf], { type: 'model/gltf-binary' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `食鹽水表面張力實驗裝置_${currentConc}pct.glb`;
+          link.click();
+          URL.revokeObjectURL(url);
+        },
+        { binary: true }
+      );
+    });
+
+    // Capture Image (White Background for Word Report)
+    document.getElementById('btn-export-png-white').addEventListener('click', () => {
+      const origBg = scene.background;
+      scene.background = new THREE.Color(0xffffff);
+      floor.visible = false;
+      grid.visible = false;
+      document.getElementById('hotspot-labels-container').style.display = 'none';
+
+      renderer.render(scene, camera);
+      const dataURL = renderer.domElement.toDataURL('image/png');
+
+      const link = document.createElement('a');
+      link.href = dataURL;
+      link.download = `實驗裝置3D示意圖_白底報告用.png`;
+      link.click();
+
+      // Restore
+      scene.background = origBg;
+      floor.visible = true;
+      grid.visible = true;
+      if (labelsVisible) document.getElementById('hotspot-labels-container').style.display = 'block';
+    });
+
+    // Capture Image (Transparent PNG for Slide Layout)
+    document.getElementById('btn-export-png-trans').addEventListener('click', () => {
+      const origBg = scene.background;
+      scene.background = null;
+      floor.visible = false;
+      grid.visible = false;
+      document.getElementById('hotspot-labels-container').style.display = 'none';
+
+      renderer.render(scene, camera);
+      const dataURL = renderer.domElement.toDataURL('image/png');
+
+      const link = document.createElement('a');
+      link.href = dataURL;
+      link.download = `實驗裝置3D示意圖_去背透明.png`;
+      link.click();
+
+      // Restore
+      scene.background = origBg;
+      floor.visible = true;
+      grid.visible = true;
+      if (labelsVisible) document.getElementById('hotspot-labels-container').style.display = 'block';
+    });
+
+    /* =========================================================
+       9. MAIN ANIMATION LOOP & RESIZE
+       ========================================================= */
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      updateHotspotPositions();
+      renderer.render(scene, camera);
+    }
+
+    // Initialize state
+    setConcentration(0);
+    animate();
+  </script>
+</body>
+</html>
