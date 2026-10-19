@@ -115,7 +115,7 @@
       position: absolute;
       top: 80px;
       left: 20px;
-      width: 320px;
+      width: 325px;
       z-index: 10;
       padding: 18px;
       max-height: calc(100vh - 100px);
@@ -144,7 +144,7 @@
       padding: 8px 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .section-title {
@@ -160,7 +160,7 @@
     }
 
     .control-group {
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .control-label {
@@ -241,6 +241,53 @@
       flex: 1;
       padding: 6px 4px;
       font-size: 0.8rem;
+    }
+
+    /* Step Guide Grid */
+    .step-guide-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .step-btn {
+      font-size: 0.77rem;
+      padding: 7px 6px;
+      text-align: left;
+      border-radius: 6px;
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .step-btn:hover {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    .step-btn.active {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+      font-weight: 600;
+    }
+
+    .step-desc-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 14px;
     }
 
     /* Range slider */
@@ -395,7 +442,7 @@
     /* 3D Label Hotspots */
     .hotspot-label {
       position: absolute;
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 23, 42, 0.88);
       border: 1px solid var(--accent);
       color: #f8fafc;
       padding: 4px 8px;
@@ -457,7 +504,7 @@
     }
   </style>
 
-  <!-- Load Local Three.js and dependencies (with automatic CDN fallback) -->
+  <!-- Load Three.js and dependencies (with automatic CDN fallback) -->
   <script src="libs/three.min.js"></script>
   <script>
     if (typeof THREE === 'undefined') {
@@ -492,7 +539,7 @@
         🧪 食鹽水表面張力測定裝置 3D 模型
         <span class="badge">探究與實作專題</span>
       </h1>
-      <p class="header-subtitle">基於拉脫法（Detachment Method）等臂天平測量系統之高精度 3D 數位孿生模型</p>
+      <p class="header-subtitle">依據 1018 實驗操作實錄影片修正幾何與流程 (支架定位、防墜方盤、肋條杯身、四大步驟導覽)</p>
     </div>
 
     <div class="header-actions">
@@ -514,6 +561,22 @@
 
   <!-- Left Sidebar: Controls & Modes -->
   <div id="control-panel" class="glass-panel">
+    
+    <!-- 4-Step Interactive Guide from 1018(1).mp4 -->
+    <div class="section-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      實驗四步驟流程導覽
+    </div>
+    <div class="step-guide-grid">
+      <button class="step-btn" id="step-btn-1" onclick="runExperimentStep(1)">① 測量食鹽克數</button>
+      <button class="step-btn" id="step-btn-2" onclick="runExperimentStep(2)">② 調配食鹽水溶液</button>
+      <button class="step-btn" id="step-btn-3" onclick="runExperimentStep(3)">③ 放入珠子增重拉脫</button>
+      <button class="step-btn" id="step-btn-4" onclick="runExperimentStep(4)">④ 測量珠子換算張力</button>
+    </div>
+    <div id="step-desc-box" class="step-desc-card">
+      點擊上方四步驟按鈕，即可引導視角並演示對應之真實操作流程與受力動態。
+    </div>
+
     <div class="section-title">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       實驗模擬控制
@@ -561,7 +624,7 @@
       </button>
     </div>
 
-    <div class="section-title" style="margin-top: 16px;">
+    <div class="section-title" style="margin-top: 14px;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       視角與可視化圖層
     </div>
@@ -681,7 +744,6 @@
         <text x="24" y="55" fill="#64748b" font-size="8" text-anchor="end">0.07</text>
 
         <!-- Data Trend Polyline: x coords: 45, 95, 145, 195, 245 -->
-        <!-- y values: 0.0684 -> y=54, 0.0746 -> y=45, 0.0720 -> y=49, 0.0748 -> y=44, 0.0838 -> y=30 -->
         <polyline points="45,54 95,45 145,49 195,44 245,30" fill="none" stroke="#38bdf8" stroke-width="2.5" />
         
         <!-- Points -->
@@ -711,9 +773,10 @@
   <div id="bottom-bar" class="glass-panel">
     <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600; margin-right:4px;">視角導航:</span>
     <button onclick="setCameraView('iso')" class="btn-active" id="cam-iso">🌐 全景等角</button>
-    <button onclick="setCameraView('front')" id="cam-front">📐 正面平視 (報告示意圖)</button>
+    <button onclick="setCameraView('front')" id="cam-front">📐 正面平視 (報告示意)</button>
     <button onclick="setCameraView('beaker')" id="cam-beaker">🧪 燒杯拉脫特寫</button>
-    <button onclick="setCameraView('weights')" id="cam-weights">⚖️ 砝碼杯特寫</button>
+    <button onclick="setCameraView('weights')" id="cam-weights">⚖️ 砝碼杯與接盤</button>
+    <button onclick="setCameraView('scale')" id="cam-scale">📟 精密電子秤</button>
     <button onclick="setCameraView('top')" id="cam-top">🔝 俯視圖</button>
   </div>
 
@@ -722,12 +785,13 @@
 
   <!-- 3D Hotspot Label Overlays (Positioned dynamically in render loop) -->
   <div id="hotspot-labels-container">
-    <div class="hotspot-label" id="lbl-3d-stand">鐵架台 (底座與立柱)</div>
+    <div class="hotspot-label" id="lbl-3d-stand">鐵架台 (右側基座與立柱)</div>
     <div class="hotspot-label" id="lbl-3d-beam">木製等臂槓桿 (L₁ = L₂)</div>
-    <div class="hotspot-label" id="lbl-3d-cup">倒扣塑膠杯 (杯緣長度 21.33cm)</div>
+    <div class="hotspot-label" id="lbl-3d-cup">倒扣塑膠杯 (接觸周長 21.33cm)</div>
     <div class="hotspot-label" id="lbl-3d-beaker">1000mL 玻璃刻度燒杯</div>
-    <div class="hotspot-label" id="lbl-3d-weightcup">微調配重塑膠杯 (彩色珠子)</div>
-    <div class="hotspot-label" id="lbl-3d-scale">精密電子秤</div>
+    <div class="hotspot-label" id="lbl-3d-weightcup">配重杯 (帶水平加強肋條)</div>
+    <div class="hotspot-label" id="lbl-3d-tray">透明防墜接盤 (防珠散落)</div>
+    <div class="hotspot-label" id="lbl-3d-scale">精密電子秤 (秤量食鹽與珠重)</div>
   </div>
 
   <script>
@@ -753,12 +817,12 @@
        ========================================================= */
     const canvas = document.getElementById('webgl-canvas');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0c1222);
+    scene.background = new THREE.Color(0x0b1120);
 
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(28, 42, 62);
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.5, 300);
+    camera.position.set(28, 38, 58);
 
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
@@ -766,85 +830,75 @@
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.06;
-    controls.target.set(0, 22, 0);
-    controls.maxPolarAngle = Math.PI / 2 + 0.08; // Don't go completely below ground
+    controls.dampingFactor = 0.05;
+    controls.target.set(0, 20, 0);
+    controls.maxPolarAngle = Math.PI / 2 + 0.05;
     controls.minDistance = 15;
-    controls.maxDistance = 150;
+    controls.maxDistance = 120;
 
-    /* Lighting */
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
     scene.add(ambientLight);
 
-    const mainLight = new THREE.DirectionalLight(0xfff5ea, 1.2);
-    mainLight.position.set(35, 75, 45);
-    mainLight.castShadow = true;
-    mainLight.shadow.mapSize.width = 2048;
-    mainLight.shadow.mapSize.height = 2048;
-    mainLight.shadow.camera.near = 10;
-    mainLight.shadow.camera.far = 160;
-    mainLight.shadow.camera.left = -40;
-    mainLight.shadow.camera.right = 40;
-    mainLight.shadow.camera.top = 40;
-    mainLight.shadow.camera.bottom = -40;
-    scene.add(mainLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    dirLight.position.set(30, 60, 40);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+    dirLight.shadow.bias = -0.0005;
+    scene.add(dirLight);
 
-    const fillLight = new THREE.DirectionalLight(0x93c5fd, 0.6);
-    fillLight.position.set(-40, 40, -30);
-    scene.add(fillLight);
-
-    const rimLight = new THREE.PointLight(0x38bdf8, 0.8, 80);
-    rimLight.position.set(0, 30, -25);
+    const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.6);
+    rimLight.position.set(-30, 40, -30);
     scene.add(rimLight);
 
-    /* Laboratory Bench Floor */
+    const fillLight = new THREE.DirectionalLight(0xffeedd, 0.4);
+    fillLight.position.set(0, -10, 30);
+    scene.add(fillLight);
+
+    // Floor and Grid
     const floorGeo = new THREE.PlaneGeometry(160, 160);
     const floorMat = new THREE.MeshStandardMaterial({
-      color: 0x111827,
-      roughness: 0.35,
+      color: 0x0f172a,
+      roughness: 0.85,
       metalness: 0.1
     });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -0.05;
     floor.receiveShadow = true;
     scene.add(floor);
 
-    /* Grid overlay on floor */
-    const grid = new THREE.GridHelper(160, 40, 0x334155, 0x1e293b);
-    grid.position.y = 0.01;
+    const grid = new THREE.GridHelper(100, 50, 0x334155, 0x1e293b);
+    grid.position.y = 0.02;
     scene.add(grid);
 
     /* =========================================================
-       3. APPARATUS 3D MODEL HIERARCHY
+       3. 3D APPARATUS MODEL HIERARCHY (Corrected from 1018 Video)
        ========================================================= */
     const apparatusRoot = new THREE.Group();
     scene.add(apparatusRoot);
 
-    // Common Materials
+    // Materials
     const bluePaintMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, roughness: 0.4, metalness: 0.4 });
     const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.15, metalness: 0.9 });
     const darkMetalMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5, metalness: 0.7 });
     const woodMat = new THREE.MeshStandardMaterial({ color: 0xdfb489, roughness: 0.65, metalness: 0.05 });
     const stringMat = new THREE.MeshBasicMaterial({ color: 0xf1f5f9 });
+    const plasticMat = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      transmission: 0.75,
+      opacity: 0.65,
+      transparent: true,
+      roughness: 0.15,
+      ior: 1.48
+    });
     const glassMat = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
-      transmission: 0.9,
-      opacity: 1,
+      transmission: 0.95,
+      opacity: 0.35,
       transparent: true,
-      roughness: 0.08,
-      ior: 1.5,
-      reflectivity: 0.9,
-      clearcoat: 1.0
-    });
-    const plasticMat = new THREE.MeshPhysicalMaterial({
-      color: 0xf8fafc,
-      transmission: 0.75,
-      opacity: 0.6,
-      transparent: true,
-      roughness: 0.2,
-      ior: 1.45,
-      side: THREE.DoubleSide
+      roughness: 0.05,
+      ior: 1.52
     });
     const waterMat = new THREE.MeshPhysicalMaterial({
       color: 0x38bdf8,
@@ -855,32 +909,37 @@
       ior: 1.33
     });
 
-    /* --- Retort Stand --- */
-    const standBaseGeo = new THREE.BoxGeometry(22, 2.2, 14);
+    /* --- Retort Stand (Base & Pole on RIGHT side as in video 1018(1)) --- */
+    const STAND_BASE_X = 12.0;
+    const STAND_BASE_Z = -1.0;
+    const POLE_X = 13.5;
+    const POLE_Z = -5.5;
+    const CLAMP_Y = 48.0;
+
+    const standBaseGeo = new THREE.BoxGeometry(18, 2.0, 14);
     const standBase = new THREE.Mesh(standBaseGeo, bluePaintMat);
-    standBase.position.set(0, 1.1, -14);
+    standBase.position.set(STAND_BASE_X, 1.0, STAND_BASE_Z);
     standBase.castShadow = true;
     standBase.receiveShadow = true;
     apparatusRoot.add(standBase);
 
     // Stand bevel edge
-    const standBevelGeo = new THREE.BoxGeometry(20.5, 0.3, 12.5);
+    const standBevelGeo = new THREE.BoxGeometry(17, 0.2, 13);
     const standBevel = new THREE.Mesh(standBevelGeo, bluePaintMat);
-    standBevel.position.set(0, 2.3, -14);
+    standBevel.position.set(STAND_BASE_X, 2.1, STAND_BASE_Z);
     apparatusRoot.add(standBevel);
 
     // Vertical Steel Pole
     const poleGeo = new THREE.CylinderGeometry(0.65, 0.65, 54, 24);
     const pole = new THREE.Mesh(poleGeo, chromeMat);
-    pole.position.set(0, 28, -14);
+    pole.position.set(POLE_X, 29.0, POLE_Z);
     pole.castShadow = true;
     apparatusRoot.add(pole);
 
     // Cross Clamp
-    const clampY = 49;
     const clampGeo = new THREE.BoxGeometry(3.2, 3.2, 3.2);
     const clamp = new THREE.Mesh(clampGeo, darkMetalMat);
-    clamp.position.set(0, clampY, -14);
+    clamp.position.set(POLE_X, CLAMP_Y, POLE_Z);
     clamp.castShadow = true;
     apparatusRoot.add(clamp);
 
@@ -888,37 +947,51 @@
     const screwGeo = new THREE.CylinderGeometry(0.35, 0.35, 2.8, 12);
     const screw1 = new THREE.Mesh(screwGeo, chromeMat);
     screw1.rotation.z = Math.PI / 2;
-    screw1.position.set(-2.2, clampY, -14);
+    screw1.position.set(POLE_X + 2.0, CLAMP_Y, POLE_Z);
     apparatusRoot.add(screw1);
 
-    // Horizontal Extension Rod
-    const horizArmGeo = new THREE.CylinderGeometry(0.55, 0.55, 17, 24);
+    const screw2 = new THREE.Mesh(screwGeo, chromeMat);
+    screw2.rotation.x = Math.PI / 2;
+    screw2.position.set(POLE_X, CLAMP_Y, POLE_Z - 2.0);
+    apparatusRoot.add(screw2);
+
+    // Connector forward from pole clamp to horizontal crossbar
+    const clampConnectGeo = new THREE.CylinderGeometry(0.55, 0.55, Math.abs(POLE_Z), 16);
+    const clampConnect = new THREE.Mesh(clampConnectGeo, chromeMat);
+    clampConnect.rotation.x = Math.PI / 2;
+    clampConnect.position.set(POLE_X, CLAMP_Y, POLE_Z / 2);
+    clampConnect.castShadow = true;
+    apparatusRoot.add(clampConnect);
+
+    // Long Horizontal Cross Rod extending from right across to left
+    // from x = 16.0 to x = -4.0 (length 20cm), centered at x = 6.0, y = CLAMP_Y, z = 0
+    const horizArmGeo = new THREE.CylinderGeometry(0.6, 0.6, 20, 24);
     const horizArm = new THREE.Mesh(horizArmGeo, chromeMat);
-    horizArm.rotation.x = Math.PI / 2;
-    horizArm.position.set(0, clampY, -5.5);
+    horizArm.rotation.z = Math.PI / 2;
+    horizArm.position.set(6.0, CLAMP_Y, 0);
     horizArm.castShadow = true;
     apparatusRoot.add(horizArm);
 
     /* --- Center Pivot & Suspension System --- */
-    // Suspension string hanging from horizontal rod (0, 49, 0) to pivot (0, 36, 0)
+    // Suspension string hanging from horizontal rod (0, CLAMP_Y, 0) to pivot (0, 35, 0)
     const pivotStringGeo = new THREE.CylinderGeometry(0.06, 0.06, 13, 8);
     const pivotString = new THREE.Mesh(pivotStringGeo, stringMat);
-    pivotString.position.set(0, 42.5, 0);
+    pivotString.position.set(0, 41.5, 0);
     apparatusRoot.add(pivotString);
 
-    // Lever Pivot Group (Rotates around Z-axis at (0, 36, 0))
+    // Lever Pivot Group (Rotates around Z-axis at (0, 35, 0))
     const pivotGroup = new THREE.Group();
-    pivotGroup.position.set(0, 36, 0);
+    pivotGroup.position.set(0, 35, 0);
     apparatusRoot.add(pivotGroup);
 
-    // Wooden Lever Beam: length 30cm (-15 to +15), height 0.7cm, width 1.8cm
-    const leverGeo = new THREE.BoxGeometry(30, 0.7, 1.8);
+    // Wooden Lever Beam: length 30cm (-15 to +15), height 0.6cm, width 1.8cm
+    const leverGeo = new THREE.BoxGeometry(30, 0.6, 1.8);
     const leverBeam = new THREE.Mesh(leverGeo, woodMat);
     leverBeam.castShadow = true;
     pivotGroup.add(leverBeam);
 
     // Center Tie Collar
-    const centerTieGeo = new THREE.BoxGeometry(0.5, 0.9, 2.0);
+    const centerTieGeo = new THREE.BoxGeometry(0.5, 0.8, 2.0);
     const centerTie = new THREE.Mesh(centerTieGeo, stringMat);
     pivotGroup.add(centerTie);
 
@@ -928,19 +1001,19 @@
     leftHangerGroup.position.set(LEFT_ARM_X, 0, 0);
     pivotGroup.add(leftHangerGroup);
 
-    // Left String (length ~ 13.5cm)
-    const leftStringGeo = new THREE.CylinderGeometry(0.05, 0.05, 13.5, 8);
+    // Left String (length 14cm: 35.0 to 21.0)
+    const leftStringGeo = new THREE.CylinderGeometry(0.05, 0.05, 14, 8);
     const leftString = new THREE.Mesh(leftStringGeo, stringMat);
-    leftString.position.set(0, -6.75, 0);
+    leftString.position.set(0, -7.0, 0);
     leftHangerGroup.add(leftString);
 
     // Left Inverted Cup Group
     const invertedCupGroup = new THREE.Group();
-    invertedCupGroup.position.set(0, -13.5, 0);
+    invertedCupGroup.position.set(0, -14.0, 0);
     leftHangerGroup.add(invertedCupGroup);
 
-    // Inverted Cup Mesh: Cup top (at bottom of group) radius 2.4, Rim (at y = -9) radius 3.4
-    // Circumference = 2 * pi * 3.4 = 21.36 cm (matches student sheet 21.33 cm!)
+    // Inverted Cup Mesh: Cup top radius 2.4, Rim radius 3.4, height 9.0
+    // Circumference = 2 * pi * 3.4 = 21.36 cm (student sheet: 21.33 cm)
     const cupHeight = 9.0;
     const cupGeo = new THREE.CylinderGeometry(2.4, 3.4, cupHeight, 36, 1, true);
     const invertedCup = new THREE.Mesh(cupGeo, plasticMat);
@@ -960,6 +1033,16 @@
     cupLip.rotation.x = Math.PI / 2;
     cupLip.position.set(0, -cupHeight, 0);
     invertedCupGroup.add(cupLip);
+
+    // Cup reinforcing ribs
+    [-2.2, -4.5, -6.8].forEach(ry => {
+      const ribR = 2.4 + (-ry / cupHeight) * (3.4 - 2.4);
+      const ribGeo = new THREE.TorusGeometry(ribR + 0.05, 0.06, 8, 36);
+      const ribMesh = new THREE.Mesh(ribGeo, plasticMat);
+      ribMesh.rotation.x = Math.PI / 2;
+      ribMesh.position.set(0, ry, 0);
+      invertedCupGroup.add(ribMesh);
+    });
 
     // String tie knot at top of cup
     const tieKnotGeo = new THREE.SphereGeometry(0.3, 12, 12);
@@ -997,7 +1080,7 @@
     beakerGroup.add(beakerRim);
 
     // Beaker Volume Graduation Scale Rings (200, 400, 600, 800, 1000 mL)
-    const scaleLineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 });
+    const scaleLineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.65 });
     for (let ml = 200; ml <= 1000; ml += 200) {
       const lineY = (ml / 1000) * 12.0 + 1.2;
       const gradGeo = new THREE.TorusGeometry(beakerRadius + 0.02, 0.05, 8, 32, Math.PI / 3);
@@ -1008,8 +1091,8 @@
       beakerGroup.add(gradLine);
     }
 
-    // Salt Water Liquid: surface height touches cup rim at rest (y = 13.5cm)
-    const liquidHeight = 13.5;
+    // Salt Water Liquid: surface height touches cup rim at rest (y = 12.0cm)
+    const liquidHeight = 12.0;
     const waterGeo = new THREE.CylinderGeometry(beakerRadius - 0.15, beakerRadius - 0.15, liquidHeight, 48);
     const waterMesh = new THREE.Mesh(waterGeo, waterMat);
     waterMesh.position.set(0, liquidHeight / 2 + 0.2, 0);
@@ -1025,7 +1108,7 @@
       side: THREE.DoubleSide
     });
     const meniscusMesh = new THREE.Mesh(meniscusGeo, meniscusMat);
-    meniscusMesh.position.set(0, 13.5, 0);
+    meniscusMesh.position.set(0, 12.0, 0);
     beakerGroup.add(meniscusMesh);
 
     /* --- Right Hanging Apparatus (Upright Cup + Colored Beads) --- */
@@ -1034,21 +1117,21 @@
     rightHangerGroup.position.set(RIGHT_ARM_X, 0, 0);
     pivotGroup.add(rightHangerGroup);
 
-    // Right V-shape Strings
+    // Right V-shape Strings (length 17cm from 35.0 to 18.0)
     const rightString1Geo = new THREE.CylinderGeometry(0.05, 0.05, 17, 8);
     const rightString1 = new THREE.Mesh(rightString1Geo, stringMat);
-    rightString1.position.set(0, -8.5, -1.5);
-    rightString1.rotation.x = -0.15;
+    rightString1.position.set(0, -8.5, -1.8);
+    rightString1.rotation.x = -0.12;
     rightHangerGroup.add(rightString1);
 
     const rightString2 = new THREE.Mesh(rightString1Geo, stringMat);
-    rightString2.position.set(0, -8.5, 1.5);
-    rightString2.rotation.x = 0.15;
+    rightString2.position.set(0, -8.5, 1.8);
+    rightString2.rotation.x = 0.12;
     rightHangerGroup.add(rightString2);
 
-    // Right Upright Plastic Cup (Rim at y = -17, Bottom at y = -26)
+    // Right Upright Plastic Cup (Rim at y = 18, Bottom at y = 9)
     const weightCupGroup = new THREE.Group();
-    weightCupGroup.position.set(0, -17, 0);
+    weightCupGroup.position.set(0, -17.0, 0);
     rightHangerGroup.add(weightCupGroup);
 
     const weightCupGeo = new THREE.CylinderGeometry(3.4, 2.4, cupHeight, 36, 1, true);
@@ -1070,17 +1153,27 @@
     weightCupLip.position.set(0, 0, 0);
     weightCupGroup.add(weightCupLip);
 
+    // Weight Cup ribs
+    [-2.2, -4.5, -6.8].forEach(ry => {
+      const ribR = 3.4 - (-ry / cupHeight) * (3.4 - 2.4);
+      const ribGeo = new THREE.TorusGeometry(ribR + 0.05, 0.06, 8, 36);
+      const ribMesh = new THREE.Mesh(ribGeo, plasticMat);
+      ribMesh.rotation.x = Math.PI / 2;
+      ribMesh.position.set(0, ry, 0);
+      weightCupGroup.add(ribMesh);
+    });
+
     // Colored Beads inside the Right Cup
     const beadsGroup = new THREE.Group();
     beadsGroup.position.set(0, -cupHeight + 0.35, 0);
     weightCupGroup.add(beadsGroup);
 
     const beadMaterials = [
-      new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.3, metalness: 0.3 }), // Red
-      new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.25, metalness: 0.5 }), // Gold
-      new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.3 }), // Cyan
-      new THREE.MeshStandardMaterial({ color: 0xa855f7, roughness: 0.3, metalness: 0.3 }), // Purple
-      new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.2 }), // Pearl white
+      new THREE.MeshStandardMaterial({ color: 0xf43f5e, roughness: 0.3, metalness: 0.3 }),
+      new THREE.MeshStandardMaterial({ color: 0xfbbf24, roughness: 0.25, metalness: 0.5 }),
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.3 }),
+      new THREE.MeshStandardMaterial({ color: 0xa855f7, roughness: 0.3, metalness: 0.3 }),
+      new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.2 }),
     ];
 
     const beadMeshes = [];
@@ -1099,15 +1192,46 @@
       
       beadMesh.position.set(bx, by, bz);
       beadMesh.castShadow = true;
-      beadMesh.visible = false; // controlled by weight
+      beadMesh.visible = false;
       beadsGroup.add(beadMesh);
       beadMeshes.push(beadMesh);
     }
 
-    /* --- Laboratory Accessories: Digital Scale & Red Tray --- */
-    // Digital Scale directly under the right cup
+    // Transparent Square Catch Tray sitting on the blue stand base directly under right cup (from video)
+    const trayGroup = new THREE.Group();
+    trayGroup.position.set(RIGHT_ARM_X, 2.7, 0);
+    apparatusRoot.add(trayGroup);
+
+    const trayBaseGeo = new THREE.BoxGeometry(11, 0.4, 11);
+    const trayBase = new THREE.Mesh(trayBaseGeo, plasticMat);
+    trayBase.position.set(0, 0.2, 0);
+    trayGroup.add(trayBase);
+
+    // Tray 4 side walls
+    const wallThick = 0.3;
+    const wallH = 1.0;
+    const wallNGeo = new THREE.BoxGeometry(11, wallH, wallThick);
+    const wallN = new THREE.Mesh(wallNGeo, plasticMat);
+    wallN.position.set(0, wallH / 2, 5.35);
+    trayGroup.add(wallN);
+
+    const wallS = new THREE.Mesh(wallNGeo, plasticMat);
+    wallS.position.set(0, wallH / 2, -5.35);
+    trayGroup.add(wallS);
+
+    const wallEGeo = new THREE.BoxGeometry(wallThick, wallH, 10.4);
+    const wallE = new THREE.Mesh(wallEGeo, plasticMat);
+    wallE.position.set(5.35, wallH / 2, 0);
+    trayGroup.add(wallE);
+
+    const wallW = new THREE.Mesh(wallEGeo, plasticMat);
+    wallW.position.set(-5.35, wallH / 2, 0);
+    trayGroup.add(wallW);
+
+    /* --- Laboratory Accessories: Digital Scale in Foreground & Red Water Tray --- */
+    // Digital Scale placed in the front workspace table at (0, 0, 16.0)
     const scaleGroup = new THREE.Group();
-    scaleGroup.position.set(RIGHT_ARM_X, 0, 0);
+    scaleGroup.position.set(0, 0, 16.0);
     apparatusRoot.add(scaleGroup);
 
     const scaleBaseGeo = new THREE.BoxGeometry(11, 1.6, 11);
@@ -1123,16 +1247,22 @@
     scaleGroup.add(scalePlate);
 
     // Scale LCD Screen
-    const lcdGeo = new THREE.BoxGeometry(4.5, 0.1, 1.6);
+    const lcdGeo = new THREE.BoxGeometry(5.0, 0.1, 1.8);
     const lcdScreen = new THREE.Mesh(lcdGeo, new THREE.MeshBasicMaterial({ color: 0x0ea5e9 }));
-    lcdScreen.position.set(0, 1.65, 3.8);
+    lcdScreen.position.set(0, 1.65, 4.2);
     scaleGroup.add(lcdScreen);
 
+    // Sample dish on scale
+    const sampleDishGeo = new THREE.CylinderGeometry(2.8, 2.4, 0.6, 24);
+    const sampleDish = new THREE.Mesh(sampleDishGeo, plasticMat);
+    sampleDish.position.set(0, 2.15, 0);
+    scaleGroup.add(sampleDish);
+
     // Red water drip tray on the left
-    const redTrayGeo = new THREE.BoxGeometry(14, 1.5, 18);
+    const redTrayGeo = new THREE.BoxGeometry(12, 1.4, 16);
     const redTrayMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4 });
     const redTray = new THREE.Mesh(redTrayGeo, redTrayMat);
-    redTray.position.set(-23, 0.75, 4);
+    redTray.position.set(-22, 0.7, 5);
     redTray.castShadow = true;
     apparatusRoot.add(redTray);
 
@@ -1151,7 +1281,7 @@
     // Downward Red Vector at left cup rim: Surface Tension F_gamma
     const arrowSurfaceTension = createArrow(
       new THREE.Vector3(0, -1, 0),
-      new THREE.Vector3(LEFT_ARM_X, 13.5, 0),
+      new THREE.Vector3(LEFT_ARM_X, 12.0, 0),
       5.5,
       0xf43f5e
     );
@@ -1169,7 +1299,7 @@
     // Upward Blue Vector at center pivot: Support Reaction N
     const arrowPivot = createArrow(
       new THREE.Vector3(0, 1, 0),
-      new THREE.Vector3(0, 36.5, 0),
+      new THREE.Vector3(0, 35.5, 0),
       6.0,
       0x38bdf8
     );
@@ -1182,8 +1312,8 @@
     // Dimension line L1 (left lever arm: 13.5cm)
     const dimLineMat = new THREE.LineDashedMaterial({ color: 0xfbbf24, dashSize: 0.5, gapSize: 0.3 });
     const dimL1Geo = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(0, 38.5, 0),
-      new THREE.Vector3(LEFT_ARM_X, 38.5, 0)
+      new THREE.Vector3(0, 37.5, 0),
+      new THREE.Vector3(LEFT_ARM_X, 37.5, 0)
     ]);
     const dimL1 = new THREE.Line(dimL1Geo, dimLineMat);
     dimL1.computeLineDistances();
@@ -1191,8 +1321,8 @@
 
     // Dimension line L2 (right lever arm: 13.5cm)
     const dimL2Geo = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(0, 38.5, 0),
-      new THREE.Vector3(RIGHT_ARM_X, 38.5, 0)
+      new THREE.Vector3(0, 37.5, 0),
+      new THREE.Vector3(RIGHT_ARM_X, 37.5, 0)
     ]);
     const dimL2 = new THREE.Line(dimL2Geo, dimLineMat);
     dimL2.computeLineDistances();
@@ -1273,28 +1403,28 @@
         }
         // Cup is detached from water
         const excess = currentBeadWeight - criticalWeight;
-        const tiltAngle = Math.min(0.25, 0.08 + excess * 0.12); // Right side tilts down
-        pivotGroup.rotation.z = -tiltAngle; // tilt beam
+        const tiltAngle = Math.min(0.25, 0.08 + excess * 0.12);
+        pivotGroup.rotation.z = -tiltAngle;
         
-        // Hide/collapse meniscus necking
+        // Hide meniscus necking
         meniscusMesh.visible = false;
         
         // Scale gravity arrow proportionally
         arrowGravity.scale.set(1, 1 + currentBeadWeight * 0.4, 1);
-        arrowSurfaceTension.visible = false; // No surface tension acting once pulled off!
+        arrowSurfaceTension.visible = false;
       } else {
         isDetached = false;
         hideDetachmentAlert();
 
         // Beam stays almost level, slightly tensed
         const tensionRatio = currentBeadWeight / criticalWeight;
-        pivotGroup.rotation.z = -tensionRatio * 0.02; // very slight pre-tilt
+        pivotGroup.rotation.z = -tensionRatio * 0.02;
 
         // Meniscus stretches upward as cup edge is pulled up
         meniscusMesh.visible = true;
         const stretchHeight = 0.8 + tensionRatio * 1.4;
         meniscusMesh.scale.set(1 - tensionRatio * 0.1, stretchHeight, 1 - tensionRatio * 0.1);
-        meniscusMesh.position.y = 13.5 + stretchHeight * 0.3;
+        meniscusMesh.position.y = 12.0 + stretchHeight * 0.3;
 
         // Force arrows visible
         arrowSurfaceTension.visible = true;
@@ -1351,7 +1481,61 @@
     }
 
     /* =========================================================
-       6. TOGGLE CONTROLS & CAMERA PRESETS
+       6. 4-STEP EXPERIMENT TOUR (from 1018(1).mp4)
+       ========================================================= */
+    const STEP_INFO = {
+      1: {
+        title: "步驟 ①：測量食鹽克數",
+        desc: "使用精密電子秤精確秤量食鹽（如 0g、25g、50g、75g、100g），以便調配 0% 至 20% 目標重量百分濃度溶液。",
+        camPos: new THREE.Vector3(0, 14, 28),
+        lookAt: new THREE.Vector3(0, 2, 16)
+      },
+      2: {
+        title: "步驟 ②：調配食鹽水溶液",
+        desc: "將稱量好的食鹽倒入 1000mL 大燒杯中，加入定量純水並充分攪拌至完全溶解，確保液面高度剛好接觸倒扣杯緣。",
+        camPos: new THREE.Vector3(LEFT_ARM_X + 9, 20, 22),
+        lookAt: new THREE.Vector3(LEFT_ARM_X, 12, 0)
+      },
+      3: {
+        title: "步驟 ③：放入珠子增重拉脫",
+        desc: "槓桿歸零平衡後，向右側配重杯中一顆一顆投入彩色珠子增重；隨重力拉扯，水膜出現頸縮，直至達到臨界力瞬間拉脫！",
+        camPos: new THREE.Vector3(4, 28, 56),
+        lookAt: new THREE.Vector3(0, 20, 0)
+      },
+      4: {
+        title: "步驟 ④：測量珠子總重換算表面張力",
+        desc: "取出拉脫瞬間配重杯內的所有珠子，移至電子秤測出精確臨界總重 m，代入公式 γ = (m × g) / L 換算表面張力值。",
+        camPos: new THREE.Vector3(12, 16, 28),
+        lookAt: new THREE.Vector3(RIGHT_ARM_X, 8, 0)
+      }
+    };
+
+    function runExperimentStep(step) {
+      document.querySelectorAll('.step-btn').forEach((btn, idx) => {
+        if (idx + 1 === step) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      const info = STEP_INFO[step];
+      const descBox = document.getElementById('step-desc-box');
+      if (descBox) {
+        descBox.innerHTML = `<strong>${info.title}</strong><br>${info.desc}`;
+      }
+
+      animateCamera(info.camPos, info.lookAt);
+
+      if (step === 3) {
+        if (currentBeadWeight === 0 && !isAutoSimulating) {
+          toggleAutoSimulate();
+        }
+      }
+    }
+
+    /* =========================================================
+       7. TOGGLE CONTROLS & CAMERA PRESETS
        ========================================================= */
     function toggleForceVectors(show) {
       vectorsGroup.visible = show;
@@ -1373,19 +1557,20 @@
     }
 
     function setCameraView(preset) {
-      // Highlight button
       document.querySelectorAll('#bottom-bar button').forEach(b => b.className = '');
       const btn = document.getElementById(`cam-${preset}`);
       if (btn) btn.className = 'btn-active';
 
       if (preset === 'iso') {
-        animateCamera(new THREE.Vector3(28, 42, 62), new THREE.Vector3(0, 22, 0));
+        animateCamera(new THREE.Vector3(28, 38, 58), new THREE.Vector3(0, 20, 0));
       } else if (preset === 'front') {
-        animateCamera(new THREE.Vector3(0, 24, 75), new THREE.Vector3(0, 24, 0));
+        animateCamera(new THREE.Vector3(0, 24, 72), new THREE.Vector3(0, 24, 0));
       } else if (preset === 'beaker') {
-        animateCamera(new THREE.Vector3(LEFT_ARM_X + 6, 20, 24), new THREE.Vector3(LEFT_ARM_X, 15, 0));
+        animateCamera(new THREE.Vector3(LEFT_ARM_X + 6, 18, 22), new THREE.Vector3(LEFT_ARM_X, 12, 0));
       } else if (preset === 'weights') {
-        animateCamera(new THREE.Vector3(RIGHT_ARM_X - 6, 16, 24), new THREE.Vector3(RIGHT_ARM_X, 10, 0));
+        animateCamera(new THREE.Vector3(RIGHT_ARM_X + 6, 16, 22), new THREE.Vector3(RIGHT_ARM_X, 10, 0));
+      } else if (preset === 'scale') {
+        animateCamera(new THREE.Vector3(0, 14, 28), new THREE.Vector3(0, 2, 16));
       } else if (preset === 'top') {
         animateCamera(new THREE.Vector3(0, 85, 5), new THREE.Vector3(0, 20, 0));
       }
@@ -1417,15 +1602,16 @@
     }
 
     /* =========================================================
-       7. 3D HOTSPOT LABELS TRACKING
+       8. 3D HOTSPOT LABELS TRACKING
        ========================================================= */
     const hotspots = [
-      { id: 'lbl-3d-stand', pos: new THREE.Vector3(0, 52, -14) },
-      { id: 'lbl-3d-beam', pos: new THREE.Vector3(0, 37.5, 0) },
-      { id: 'lbl-3d-cup', pos: new THREE.Vector3(LEFT_ARM_X, 23.5, 0) },
+      { id: 'lbl-3d-stand', pos: new THREE.Vector3(POLE_X, 52, POLE_Z) },
+      { id: 'lbl-3d-beam', pos: new THREE.Vector3(0, 36.5, 0) },
+      { id: 'lbl-3d-cup', pos: new THREE.Vector3(LEFT_ARM_X, 22.5, 0) },
       { id: 'lbl-3d-beaker', pos: new THREE.Vector3(LEFT_ARM_X - 5.5, 12, 0) },
-      { id: 'lbl-3d-weightcup', pos: new THREE.Vector3(RIGHT_ARM_X + 4.5, 12, 0) },
-      { id: 'lbl-3d-scale', pos: new THREE.Vector3(RIGHT_ARM_X, 2.5, 6) }
+      { id: 'lbl-3d-weightcup', pos: new THREE.Vector3(RIGHT_ARM_X + 4.5, 13, 0) },
+      { id: 'lbl-3d-tray', pos: new THREE.Vector3(RIGHT_ARM_X, 4.0, 0) },
+      { id: 'lbl-3d-scale', pos: new THREE.Vector3(0, 2.5, 16) }
     ];
 
     function updateHotspotPositions() {
@@ -1455,9 +1641,8 @@
     }
 
     /* =========================================================
-       8. EXPORT SUITE (GLB / PNG)
+       9. EXPORT SUITE (GLB / PNG)
        ========================================================= */
-    // Export GLB file
     document.getElementById('btn-export-glb').addEventListener('click', () => {
       if (typeof THREE.GLTFExporter === 'undefined') {
         alert('GLTFExporter 正在載入，請稍候重試！');
@@ -1479,7 +1664,6 @@
       );
     });
 
-    // Capture Image (White Background for Word Report)
     document.getElementById('btn-export-png-white').addEventListener('click', () => {
       const origBg = scene.background;
       scene.background = new THREE.Color(0xffffff);
@@ -1495,14 +1679,12 @@
       link.download = `實驗裝置3D示意圖_白底報告用.png`;
       link.click();
 
-      // Restore
       scene.background = origBg;
       floor.visible = true;
       grid.visible = true;
       if (labelsVisible) document.getElementById('hotspot-labels-container').style.display = 'block';
     });
 
-    // Capture Image (Transparent PNG for Slide Layout)
     document.getElementById('btn-export-png-trans').addEventListener('click', () => {
       const origBg = scene.background;
       scene.background = null;
@@ -1518,7 +1700,6 @@
       link.download = `實驗裝置3D示意圖_去背透明.png`;
       link.click();
 
-      // Restore
       scene.background = origBg;
       floor.visible = true;
       grid.visible = true;
@@ -1526,7 +1707,7 @@
     });
 
     /* =========================================================
-       9. MAIN ANIMATION LOOP & RESIZE
+       10. MAIN ANIMATION LOOP & RESIZE
        ========================================================= */
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
