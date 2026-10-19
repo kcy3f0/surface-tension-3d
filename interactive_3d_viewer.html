@@ -6,14 +6,25 @@
   <title>食鹽水表面張力測定裝置 - 3D 互動檢視器</title>
   <style>
     :root {
-      --bg-studio: #f8fafc;
+      --bg-studio: radial-gradient(circle at 50% 40%, #f1f5f9 0%, #cbd5e1 100%);
       --text-main: #0f172a;
-      --text-muted: #64748b;
+      --text-muted: #475569;
       --accent: #0284c7;
       --accent-hover: #0369a1;
-      --pill-bg: rgba(255, 255, 255, 0.85);
-      --pill-border: rgba(203, 213, 225, 0.8);
-      --pill-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+      --pill-bg: rgba(255, 255, 255, 0.92);
+      --pill-border: rgba(148, 163, 184, 0.5);
+      --pill-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    body.dark-mode {
+      --bg-studio: radial-gradient(circle at 50% 40%, #1e293b 0%, #090d16 100%);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #7dd3fc;
+      --pill-bg: rgba(30, 41, 59, 0.9);
+      --pill-border: rgba(71, 85, 105, 0.7);
+      --pill-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.5);
     }
 
     * {
@@ -26,11 +37,12 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
-      background-color: var(--bg-studio);
+      background: var(--bg-studio);
       color: var(--text-main);
       overflow: hidden;
       width: 100vw;
       height: 100vh;
+      transition: background 0.3s ease;
     }
 
     #webgl-canvas {
@@ -51,10 +63,18 @@
       left: 24px;
       z-index: 10;
       pointer-events: none;
+      background: var(--pill-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--pill-border);
+      box-shadow: var(--pill-shadow);
+      transition: all 0.3s ease;
     }
 
     .top-brand h1 {
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: var(--text-main);
       letter-spacing: -0.2px;
@@ -73,8 +93,14 @@
       border-radius: 9999px;
     }
 
+    body.dark-mode .top-brand h1 span {
+      background: #0369a1;
+      color: #e0f2fe;
+      border-color: #0284c7;
+    }
+
     .top-brand p {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: var(--text-muted);
       margin-top: 3px;
     }
@@ -92,10 +118,11 @@
       border: 1px solid var(--pill-border);
       border-radius: 40px;
       box-shadow: var(--pill-shadow);
-      padding: 6px 12px;
+      padding: 6px 14px;
       display: flex;
       align-items: center;
       gap: 8px;
+      transition: background 0.3s ease, border-color 0.3s ease;
     }
 
     .tool-btn {
@@ -116,8 +143,7 @@
     }
 
     .tool-btn:hover {
-      background: rgba(241, 245, 249, 0.9);
-      border-color: rgba(203, 213, 225, 0.6);
+      background: rgba(148, 163, 184, 0.2);
       color: var(--accent);
     }
 
@@ -128,21 +154,26 @@
       font-weight: 600;
     }
 
+    body.dark-mode .tool-btn.active {
+      background: #0369a1;
+      border-color: #38bdf8;
+      color: #ffffff;
+    }
+
     .tool-btn.primary {
       background: #0284c7;
       color: #ffffff;
-      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
     }
 
     .tool-btn.primary:hover {
       background: #0369a1;
-      color: #ffffff;
     }
 
     .divider {
       width: 1px;
       height: 18px;
-      background: rgba(203, 213, 225, 0.8);
+      background: var(--pill-border);
       margin: 0 2px;
     }
 
@@ -150,9 +181,10 @@
       .top-brand {
         top: 14px;
         left: 16px;
+        padding: 8px 12px;
       }
       .top-brand h1 {
-        font-size: 1rem;
+        font-size: 0.95rem;
       }
       .top-brand p {
         display: none;
@@ -207,6 +239,10 @@
 
   <!-- Minimal Floating Toolbar -->
   <div class="toolbar">
+    <button class="tool-btn" id="btn-theme" onclick="toggleTheme()" title="切換 明亮工作室 / 深色實驗桌 背景">
+      🌙 深色模式
+    </button>
+    <div class="divider"></div>
     <button class="tool-btn" id="btn-reset" onclick="resetView()" title="重置為最佳觀看角度">
       🔄 重置視角
     </button>
@@ -225,11 +261,17 @@
        ========================================================= */
     const canvas = document.getElementById('webgl-canvas');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf8fafc);
+    
+    // Balanced studio colors: subtle cool gray so transparent objects have solid contrast
+    let isDarkMode = false;
+    const LIGHT_BG = new THREE.Color(0xdce4ec);
+    const DARK_BG = new THREE.Color(0x0f172a);
+    scene.background = LIGHT_BG;
 
-    const camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.5, 300);
-    const DEFAULT_CAM_POS = new THREE.Vector3(26, 32, 50);
-    const DEFAULT_LOOK_AT = new THREE.Vector3(0, 18, 0);
+    const camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, 0.5, 300);
+    // Adjusted initial camera for complete overview of base and containers
+    const DEFAULT_CAM_POS = new THREE.Vector3(26, 32, 54);
+    const DEFAULT_LOOK_AT = new THREE.Vector3(0, 22, 0);
     camera.position.copy(DEFAULT_CAM_POS);
 
     const renderer = new THREE.WebGLRenderer({
@@ -253,12 +295,12 @@
     controls.autoRotate = false;
     controls.autoRotateSpeed = 1.0;
 
-    // Clean Studio Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
+    // Three-point balanced studio lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
     scene.add(ambientLight);
 
-    const mainLight = new THREE.DirectionalLight(0xffffff, 0.95);
-    mainLight.position.set(30, 55, 40);
+    const mainLight = new THREE.DirectionalLight(0xffffff, 0.85);
+    mainLight.position.set(28, 48, 38);
     mainLight.castShadow = true;
     mainLight.shadow.mapSize.width = 2048;
     mainLight.shadow.mapSize.height = 2048;
@@ -271,17 +313,17 @@
     mainLight.shadow.camera.bottom = -10;
     scene.add(mainLight);
 
-    const fillLight = new THREE.DirectionalLight(0xe0f2fe, 0.45);
-    fillLight.position.set(-30, 40, -30);
+    const fillLight = new THREE.DirectionalLight(0xbfdbfe, 0.45);
+    fillLight.position.set(-30, 35, -20);
     scene.add(fillLight);
 
-    const softFront = new THREE.DirectionalLight(0xfff7ed, 0.35);
-    softFront.position.set(0, 20, 40);
-    scene.add(softFront);
+    const rimLight = new THREE.DirectionalLight(0xfffbeb, 0.35);
+    rimLight.position.set(0, 25, 40);
+    scene.add(rimLight);
 
     // Studio Contact Ground Plane (Receives Soft Shadows)
-    const floorGeo = new THREE.PlaneGeometry(120, 120);
-    const floorMat = new THREE.ShadowMaterial({ opacity: 0.12 });
+    const floorGeo = new THREE.PlaneGeometry(160, 160);
+    const floorMat = new THREE.ShadowMaterial({ opacity: 0.18 });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = 0.0;
@@ -289,20 +331,79 @@
     scene.add(floor);
 
     /* =========================================================
-       2. CORE APPARATUS 3D MODEL (ALIGNED WITH 1018 VIDEO)
+       2. PROCEDURAL TEXTURES (BEAKER GRADUATIONS)
+       ========================================================= */
+    function createBeakerScaleTexture() {
+      const c = document.createElement('canvas');
+      c.width = 1024;
+      c.height = 1024;
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, 1024, 1024);
+
+      // We draw graduations on front-facing sector
+      const startX = 380;
+      const endX = 640;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 5;
+      ctx.textAlign = 'left';
+      ctx.font = 'bold 34px sans-serif';
+
+      // Brand logo
+      ctx.fillText('PYREX® 1000mL', startX + 10, 220);
+      ctx.font = '26px sans-serif';
+      ctx.fillText('BORO 3.3  APPROX.', startX + 10, 260);
+
+      const marks = [
+        { ml: '1000', y: 320, major: true },
+        { ml: '900',  y: 385, major: false },
+        { ml: '800',  y: 450, major: true },
+        { ml: '700',  y: 515, major: false },
+        { ml: '600',  y: 580, major: true },
+        { ml: '500',  y: 645, major: false },
+        { ml: '400',  y: 710, major: true },
+        { ml: '300',  y: 775, major: false },
+        { ml: '200',  y: 840, major: true }
+      ];
+
+      marks.forEach(m => {
+        ctx.beginPath();
+        const lineLen = m.major ? 85 : 45;
+        ctx.lineWidth = m.major ? 6 : 3;
+        ctx.moveTo(startX, m.y);
+        ctx.lineTo(startX + lineLen, m.y);
+        ctx.stroke();
+
+        if (m.major) {
+          ctx.font = 'bold 30px sans-serif';
+          ctx.fillText(m.ml, startX + lineLen + 15, m.y + 10);
+        }
+      });
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.repeat.set(1, 1);
+      return tex;
+    }
+
+    const beakerScaleTex = createBeakerScaleTexture();
+
+    /* =========================================================
+       3. CORE APPARATUS 3D MODEL
        ========================================================= */
     const apparatusRoot = new THREE.Group();
     scene.add(apparatusRoot);
 
-    // Studio Materials
+    // Highly Visible & Calibrated PBR Materials
     const bluePaintMat = new THREE.MeshStandardMaterial({
-      color: 0x2563eb,
+      color: 0x1d4ed8,
       roughness: 0.35,
       metalness: 0.3
     });
     const chromeMat = new THREE.MeshStandardMaterial({
-      color: 0xf1f5f9,
-      roughness: 0.12,
+      color: 0xe2e8f0,
+      roughness: 0.15,
       metalness: 0.92
     });
     const darkMetalMat = new THREE.MeshStandardMaterial({
@@ -312,36 +413,87 @@
     });
     const woodMat = new THREE.MeshStandardMaterial({
       color: 0xd4a373,
-      roughness: 0.65,
+      roughness: 0.6,
       metalness: 0.05
     });
-    const stringMat = new THREE.MeshBasicMaterial({ color: 0x475569 });
-    const clearPlasticMat = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff,
-      transmission: 0.82,
-      opacity: 0.65,
-      transparent: true,
-      roughness: 0.12,
-      ior: 1.48
-    });
-    const glassMat = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff,
-      transmission: 0.95,
-      opacity: 0.3,
-      transparent: true,
-      roughness: 0.04,
-      ior: 1.52
-    });
-    const saltWaterMat = new THREE.MeshPhysicalMaterial({
-      color: 0x38bdf8,
-      transmission: 0.85,
-      opacity: 0.75,
-      transparent: true,
-      roughness: 0.05,
-      ior: 1.33
+    const stringMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      roughness: 0.8
     });
 
-    /* --- Retort Stand on RIGHT side --- */
+    // Frosted Translucent Polypropylene (Plastic Cup Body)
+    const plasticCupMat = new THREE.MeshStandardMaterial({
+      color: 0xf1f5f9,
+      roughness: 0.28,
+      metalness: 0.08,
+      transparent: true,
+      opacity: 0.68,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
+
+    // High-visibility rim & ribs for cups (natural molded plastic highlight)
+    const plasticFeatureMat = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      roughness: 0.25,
+      metalness: 0.1,
+      transparent: true,
+      opacity: 0.78,
+      side: THREE.DoubleSide
+    });
+
+    // Glass Beaker Material (Soft tinted ice blue with specular gleam)
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0xdbeafe,
+      roughness: 0.1,
+      metalness: 0.12,
+      transparent: true,
+      opacity: 0.42,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
+
+    const glassScaleMat = new THREE.MeshBasicMaterial({
+      map: beakerScaleTex,
+      transparent: true,
+      opacity: 0.85,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
+
+    const glassRimMat = new THREE.MeshStandardMaterial({
+      color: 0xbfdbfe,
+      roughness: 0.1,
+      metalness: 0.2,
+      transparent: true,
+      opacity: 0.75
+    });
+
+    const acrylicMat = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      roughness: 0.2,
+      metalness: 0.1,
+      transparent: true,
+      opacity: 0.6,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
+
+    const cadEdgeMat = new THREE.LineBasicMaterial({
+      color: 0x64748b,
+      transparent: true,
+      opacity: 0.7
+    });
+
+    const saltWaterMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      roughness: 0.06,
+      metalness: 0.15,
+      transparent: true,
+      opacity: 0.72
+    });
+
+    /* --- Retort Stand on RIGHT side (Consistent with 1018 Video) --- */
     const STAND_BASE_X = 12.0;
     const STAND_BASE_Z = -1.0;
     const POLE_X = 13.5;
@@ -403,7 +555,7 @@
     apparatusRoot.add(horizArm);
 
     /* --- Center Pivot & Suspension System --- */
-    const pivotStringGeo = new THREE.CylinderGeometry(0.06, 0.06, 13, 8);
+    const pivotStringGeo = new THREE.CylinderGeometry(0.07, 0.07, 13, 8);
     const pivotString = new THREE.Mesh(pivotStringGeo, stringMat);
     pivotString.position.set(0, 41.5, 0);
     apparatusRoot.add(pivotString);
@@ -419,8 +571,8 @@
     leverBeam.castShadow = true;
     pivotGroup.add(leverBeam);
 
-    const centerTieGeo = new THREE.BoxGeometry(0.5, 0.8, 2.0);
-    const centerTie = new THREE.Mesh(centerTieGeo, stringMat);
+    const centerTieGeo = new THREE.BoxGeometry(0.6, 0.8, 2.0);
+    const centerTie = new THREE.Mesh(centerTieGeo, darkMetalMat);
     pivotGroup.add(centerTie);
 
     /* --- Left Hanging Inverted Cup --- */
@@ -429,7 +581,7 @@
     leftHangerGroup.position.set(LEFT_ARM_X, 0, 0);
     pivotGroup.add(leftHangerGroup);
 
-    const leftStringGeo = new THREE.CylinderGeometry(0.05, 0.05, 14, 8);
+    const leftStringGeo = new THREE.CylinderGeometry(0.06, 0.06, 14, 8);
     const leftString = new THREE.Mesh(leftStringGeo, stringMat);
     leftString.position.set(0, -7.0, 0);
     leftHangerGroup.add(leftString);
@@ -439,28 +591,31 @@
     leftHangerGroup.add(invertedCupGroup);
 
     const cupHeight = 9.0;
+    // Cup tapered body
     const cupGeo = new THREE.CylinderGeometry(2.4, 3.4, cupHeight, 36, 1, true);
-    const invertedCup = new THREE.Mesh(cupGeo, clearPlasticMat);
+    const invertedCup = new THREE.Mesh(cupGeo, plasticCupMat);
     invertedCup.position.set(0, -cupHeight / 2, 0);
     invertedCup.castShadow = true;
     invertedCupGroup.add(invertedCup);
 
+    // Cup top circular base
     const cupTopCapGeo = new THREE.CircleGeometry(2.4, 36);
-    const cupTopCap = new THREE.Mesh(cupTopCapGeo, clearPlasticMat);
+    const cupTopCap = new THREE.Mesh(cupTopCapGeo, plasticFeatureMat);
     cupTopCap.rotation.x = -Math.PI / 2;
     invertedCupGroup.add(cupTopCap);
 
-    const cupLipGeo = new THREE.TorusGeometry(3.42, 0.12, 12, 36);
-    const cupLip = new THREE.Mesh(cupLipGeo, clearPlasticMat);
+    // Cup bottom rolled rim
+    const cupLipGeo = new THREE.TorusGeometry(3.42, 0.08, 12, 36);
+    const cupLip = new THREE.Mesh(cupLipGeo, plasticFeatureMat);
     cupLip.rotation.x = Math.PI / 2;
     cupLip.position.set(0, -cupHeight, 0);
     invertedCupGroup.add(cupLip);
 
-    // Cup reinforcing ribs
+    // Cup reinforcing horizontal ribs (subtle, elegant ridges)
     [-2.2, -4.5, -6.8].forEach(ry => {
       const ribR = 2.4 + (-ry / cupHeight) * (3.4 - 2.4);
-      const ribGeo = new THREE.TorusGeometry(ribR + 0.05, 0.06, 8, 36);
-      const ribMesh = new THREE.Mesh(ribGeo, clearPlasticMat);
+      const ribGeo = new THREE.TorusGeometry(ribR + 0.02, 0.04, 8, 36);
+      const ribMesh = new THREE.Mesh(ribGeo, plasticFeatureMat);
       ribMesh.rotation.x = Math.PI / 2;
       ribMesh.position.set(0, ry, 0);
       invertedCupGroup.add(ribMesh);
@@ -473,49 +628,49 @@
 
     const beakerHeight = 15.0;
     const beakerRadius = 5.4;
+    
+    // Main Glass Wall
     const beakerWallGeo = new THREE.CylinderGeometry(beakerRadius, beakerRadius, beakerHeight, 48, 1, true);
     const beakerWall = new THREE.Mesh(beakerWallGeo, glassMat);
     beakerWall.position.set(0, beakerHeight / 2, 0);
     beakerWall.castShadow = true;
     beakerGroup.add(beakerWall);
 
-    const beakerBottomGeo = new THREE.CylinderGeometry(beakerRadius, beakerRadius, 0.4, 48);
-    const beakerBottom = new THREE.Mesh(beakerBottomGeo, glassMat);
-    beakerBottom.position.set(0, 0.2, 0);
+    // Beaker Measurement Scale Cylinder Overlay
+    const beakerScaleGeo = new THREE.CylinderGeometry(beakerRadius + 0.02, beakerRadius + 0.02, beakerHeight, 48, 1, true);
+    const beakerScaleMesh = new THREE.Mesh(beakerScaleGeo, glassScaleMat);
+    beakerScaleMesh.position.set(0, beakerHeight / 2, 0);
+    beakerScaleMesh.rotation.y = -Math.PI / 2.3;
+    beakerGroup.add(beakerScaleMesh);
+
+    // Thick Glass Bottom Base
+    const beakerBottomGeo = new THREE.CylinderGeometry(beakerRadius, beakerRadius, 0.6, 48);
+    const beakerBottom = new THREE.Mesh(beakerBottomGeo, glassRimMat);
+    beakerBottom.position.set(0, 0.3, 0);
     beakerGroup.add(beakerBottom);
 
-    const beakerRimGeo = new THREE.TorusGeometry(beakerRadius, 0.16, 16, 48);
-    const beakerRim = new THREE.Mesh(beakerRimGeo, glassMat);
+    // Beaker Top Flared Lip Rim
+    const beakerRimGeo = new THREE.TorusGeometry(beakerRadius + 0.06, 0.16, 16, 48);
+    const beakerRim = new THREE.Mesh(beakerRimGeo, glassRimMat);
     beakerRim.rotation.x = Math.PI / 2;
     beakerRim.position.set(0, beakerHeight, 0);
     beakerGroup.add(beakerRim);
 
-    // Graduation lines
-    const scaleLineMat = new THREE.MeshBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.65 });
-    for (let ml = 200; ml <= 1000; ml += 200) {
-      const lineY = (ml / 1000) * 12.0 + 1.2;
-      const gradGeo = new THREE.TorusGeometry(beakerRadius + 0.02, 0.04, 8, 32, Math.PI / 3);
-      const gradLine = new THREE.Mesh(gradGeo, scaleLineMat);
-      gradLine.rotation.x = Math.PI / 2;
-      gradLine.rotation.z = Math.PI * 0.8;
-      gradLine.position.set(0, lineY, 0);
-      beakerGroup.add(gradLine);
-    }
-
-    // Salt Water
+    // Salt Water inside Beaker (up to 12.0cm, touching inverted cup)
     const liquidHeight = 12.0;
     const waterGeo = new THREE.CylinderGeometry(beakerRadius - 0.15, beakerRadius - 0.15, liquidHeight, 48);
     const waterMesh = new THREE.Mesh(waterGeo, saltWaterMat);
-    waterMesh.position.set(0, liquidHeight / 2 + 0.2, 0);
+    waterMesh.position.set(0, liquidHeight / 2 + 0.3, 0);
     beakerGroup.add(waterMesh);
 
-    // Adhesion meniscus ring
+    // Adhesion Liquid Meniscus Ring
     const meniscusGeo = new THREE.CylinderGeometry(3.38, 3.42, 0.7, 36, 1, true);
-    const meniscusMat = new THREE.MeshPhysicalMaterial({
+    const meniscusMat = new THREE.MeshStandardMaterial({
       color: 0x7dd3fc,
-      transmission: 0.85,
-      transparent: true,
       roughness: 0.08,
+      metalness: 0.1,
+      transparent: true,
+      opacity: 0.85,
       side: THREE.DoubleSide
     });
     const meniscusMesh = new THREE.Mesh(meniscusGeo, meniscusMat);
@@ -528,7 +683,8 @@
     rightHangerGroup.position.set(RIGHT_ARM_X, 0, 0);
     pivotGroup.add(rightHangerGroup);
 
-    const rightString1Geo = new THREE.CylinderGeometry(0.05, 0.05, 17, 8);
+    // Two hanging strings tied to cup lip
+    const rightString1Geo = new THREE.CylinderGeometry(0.06, 0.06, 17, 8);
     const rightString1 = new THREE.Mesh(rightString1Geo, stringMat);
     rightString1.position.set(0, -8.5, -1.8);
     rightString1.rotation.x = -0.12;
@@ -543,31 +699,35 @@
     weightCupGroup.position.set(0, -17.0, 0);
     rightHangerGroup.add(weightCupGroup);
 
-    const weightCup = new THREE.Mesh(cupGeo, clearPlasticMat);
+    // Upright Plastic Cup Body
+    const weightCup = new THREE.Mesh(cupGeo, plasticCupMat);
     weightCup.position.set(0, -cupHeight / 2, 0);
     weightCup.castShadow = true;
     weightCupGroup.add(weightCup);
 
-    const weightCupBottom = new THREE.Mesh(cupTopCapGeo, clearPlasticMat);
+    // Cup bottom disc (at y=-cupHeight)
+    const weightCupBottom = new THREE.Mesh(cupTopCapGeo, plasticFeatureMat);
     weightCupBottom.rotation.x = Math.PI / 2;
     weightCupBottom.position.set(0, -cupHeight, 0);
     weightCupGroup.add(weightCupBottom);
 
-    const weightCupLip = new THREE.Mesh(cupLipGeo, clearPlasticMat);
+    // Cup top rolled lip (at y=0)
+    const weightCupLip = new THREE.Mesh(cupLipGeo, plasticFeatureMat);
     weightCupLip.rotation.x = Math.PI / 2;
     weightCupLip.position.set(0, 0, 0);
     weightCupGroup.add(weightCupLip);
 
+    // Reinforcing ribs (subtle, elegant ridges)
     [-2.2, -4.5, -6.8].forEach(ry => {
       const ribR = 3.4 - (-ry / cupHeight) * (3.4 - 2.4);
-      const ribGeo = new THREE.TorusGeometry(ribR + 0.05, 0.06, 8, 36);
-      const ribMesh = new THREE.Mesh(ribGeo, clearPlasticMat);
+      const ribGeo = new THREE.TorusGeometry(ribR + 0.02, 0.04, 8, 36);
+      const ribMesh = new THREE.Mesh(ribGeo, plasticFeatureMat);
       ribMesh.rotation.x = Math.PI / 2;
       ribMesh.position.set(0, ry, 0);
       weightCupGroup.add(ribMesh);
     });
 
-    // Colored Beads inside right cup
+    // Colored Beads inside right cup (clearly resting on cup bottom)
     const beadsGroup = new THREE.Group();
     beadsGroup.position.set(0, -cupHeight + 0.35, 0);
     weightCupGroup.add(beadsGroup);
@@ -580,57 +740,94 @@
       new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.1 }),
     ];
 
-    const MAX_BEADS = 32;
+    const MAX_BEADS = 36;
     for (let b = 0; b < MAX_BEADS; b++) {
-      const radius = 0.28;
-      const beadGeo = new THREE.SphereGeometry(radius, 12, 12);
+      const radius = 0.3;
+      const beadGeo = new THREE.SphereGeometry(radius, 14, 14);
       const beadMat = beadMaterials[b % beadMaterials.length];
       const beadMesh = new THREE.Mesh(beadGeo, beadMat);
       
       const angle = (b * 137.5 * Math.PI) / 180;
-      const r = Math.sqrt(b / MAX_BEADS) * 1.7;
+      const r = Math.sqrt(b / MAX_BEADS) * 1.75;
       const bx = Math.cos(angle) * r;
       const bz = Math.sin(angle) * r;
-      const by = Math.floor(b / 12) * 0.45;
+      const by = Math.floor(b / 12) * 0.48;
       
       beadMesh.position.set(bx, by, bz);
       beadMesh.castShadow = true;
       beadsGroup.add(beadMesh);
     }
 
-    // Transparent Square Catch Tray under right cup
+    // Transparent Square Catch Tray under right cup (sitting directly on blue stand)
     const trayGroup = new THREE.Group();
     trayGroup.position.set(RIGHT_ARM_X, 2.7, 0);
     apparatusRoot.add(trayGroup);
 
     const trayBaseGeo = new THREE.BoxGeometry(11, 0.4, 11);
-    const trayBase = new THREE.Mesh(trayBaseGeo, clearPlasticMat);
+    const trayBase = new THREE.Mesh(trayBaseGeo, acrylicMat);
     trayBase.position.set(0, 0.2, 0);
     trayGroup.add(trayBase);
+
+    // Tray CAD edges for crisp readability
+    const trayBaseEdges = new THREE.LineSegments(new THREE.EdgesGeometry(trayBaseGeo), cadEdgeMat);
+    trayBaseEdges.position.set(0, 0.2, 0);
+    trayGroup.add(trayBaseEdges);
 
     const wallH = 1.0;
     const wallThick = 0.3;
     const wallNGeo = new THREE.BoxGeometry(11, wallH, wallThick);
-    const wallN = new THREE.Mesh(wallNGeo, clearPlasticMat);
+    const wallN = new THREE.Mesh(wallNGeo, acrylicMat);
     wallN.position.set(0, wallH / 2, 5.35);
     trayGroup.add(wallN);
+    const wallNEdges = new THREE.LineSegments(new THREE.EdgesGeometry(wallNGeo), cadEdgeMat);
+    wallNEdges.position.copy(wallN.position);
+    trayGroup.add(wallNEdges);
 
-    const wallS = new THREE.Mesh(wallNGeo, clearPlasticMat);
+    const wallS = new THREE.Mesh(wallNGeo, acrylicMat);
     wallS.position.set(0, wallH / 2, -5.35);
     trayGroup.add(wallS);
+    const wallSEdges = new THREE.LineSegments(new THREE.EdgesGeometry(wallNGeo), cadEdgeMat);
+    wallSEdges.position.copy(wallS.position);
+    trayGroup.add(wallSEdges);
 
     const wallEGeo = new THREE.BoxGeometry(wallThick, wallH, 10.4);
-    const wallE = new THREE.Mesh(wallEGeo, clearPlasticMat);
+    const wallE = new THREE.Mesh(wallEGeo, acrylicMat);
     wallE.position.set(5.35, wallH / 2, 0);
     trayGroup.add(wallE);
+    const wallEEdges = new THREE.LineSegments(new THREE.EdgesGeometry(wallEGeo), cadEdgeMat);
+    wallEEdges.position.copy(wallE.position);
+    trayGroup.add(wallEEdges);
 
-    const wallW = new THREE.Mesh(wallEGeo, clearPlasticMat);
+    const wallW = new THREE.Mesh(wallEGeo, acrylicMat);
     wallW.position.set(-5.35, wallH / 2, 0);
     trayGroup.add(wallW);
+    const wallWEdges = new THREE.LineSegments(new THREE.EdgesGeometry(wallEGeo), cadEdgeMat);
+    wallWEdges.position.copy(wallW.position);
+    trayGroup.add(wallWEdges);
 
     /* =========================================================
-       3. USER INTERACTIONS & CAMERA CONTROLS
+       4. USER INTERACTIONS & CAMERA CONTROLS
        ========================================================= */
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      document.body.classList.toggle('dark-mode', isDarkMode);
+      const btn = document.getElementById('btn-theme');
+      
+      if (isDarkMode) {
+        scene.background = DARK_BG;
+        floorMat.opacity = 0.35;
+        cadEdgeMat.color.setHex(0x94a3b8);
+        stringMat.color.setHex(0xf1f5f9);
+        btn.innerHTML = '☀️ 淺色模式';
+      } else {
+        scene.background = LIGHT_BG;
+        floorMat.opacity = 0.18;
+        cadEdgeMat.color.setHex(0x64748b);
+        stringMat.color.setHex(0x334155);
+        btn.innerHTML = '🌙 深色模式';
+      }
+    }
+
     function resetView() {
       animateCamera(DEFAULT_CAM_POS, DEFAULT_LOOK_AT);
       if (controls.autoRotate) toggleAutoRotate();
@@ -674,7 +871,7 @@
     }
 
     /* =========================================================
-       4. GLB EXPORT
+       5. GLB EXPORT
        ========================================================= */
     function exportGLB() {
       if (typeof THREE.GLTFExporter === 'undefined') {
@@ -698,7 +895,7 @@
     }
 
     /* =========================================================
-       5. MAIN ANIMATION LOOP & RESIZE
+       6. MAIN ANIMATION LOOP & RESIZE
        ========================================================= */
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;

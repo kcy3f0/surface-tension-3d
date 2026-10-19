@@ -30,22 +30,22 @@ Ns 5.0
 d 1.0
 
 newmtl GlassBeaker
-Kd 0.85 0.92 0.95
+Kd 0.80 0.90 0.98
 Ks 0.9 0.95 0.98
 Ns 120.0
-d 0.35
+d 0.48
 
 newmtl SaltWater
-Kd 0.25 0.65 0.85
+Kd 0.20 0.65 0.90
 Ks 0.8 0.9 0.95
 Ns 100.0
-d 0.55
+d 0.70
 
 newmtl ClearPlasticCup
-Kd 0.90 0.95 0.98
+Kd 0.92 0.94 0.96
 Ks 0.7 0.8 0.85
 Ns 80.0
-d 0.40
+d 0.68
 
 newmtl BeadRed
 Kd 0.90 0.20 0.25
